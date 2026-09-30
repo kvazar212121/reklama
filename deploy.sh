@@ -3,9 +3,9 @@ set -e
 
 echo "=== AdForge Reklama Deploy Script ==="
 
-# 0. Check Node.js and npm installation
+# 0. Check and Install Node.js, npm & Nginx
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-  echo "[0/4] Node.js va npm topilmadi. Node.js v20 LTS o'rnatilmoqda..."
+  echo "[0/5] Node.js va npm topilmadi. Node.js v20 LTS o'rnatilmoqda..."
   if command -v apt-get >/dev/null 2>&1; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt-get install -y nodejs build-essential
@@ -14,10 +14,16 @@ if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
     sudo yum install -y nodejs gcc-c++ make
   else
     echo "XATO: apt-get yoki yum paket boshqaruvchisi topilmadi."
-    echo "Iltimos, Node.js v20 ni serveringizga qo'lda o'rnating:"
-    echo "  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
-    echo "  sudo apt-get install -y nodejs"
     exit 1
+  fi
+fi
+
+if ! command -v nginx >/dev/null 2>&1; then
+  echo "[0/5] Nginx topilmadi. Nginx o'rnatilmoqda..."
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update && sudo apt-get install -y nginx
+  elif command -v yum >/dev/null 2>&1; then
+    sudo yum install -y nginx
   fi
 fi
 
@@ -25,11 +31,11 @@ echo "Node.js versiyasi: $(node -v)"
 echo "npm versiyasi: $(npm -v)"
 
 # 1. Pull latest code from GitHub
-echo "[1/4] Pulling latest code from GitHub..."
+echo "[1/5] Pulling latest code from GitHub..."
 git pull origin main
 
 # 2. Setup Backend
-echo "[2/4] Installing backend dependencies..."
+echo "[2/5] Installing backend dependencies..."
 cd backend
 npm install --production=false
 
@@ -48,14 +54,14 @@ fi
 cd ..
 
 # 3. Setup Frontend
-echo "[3/4] Building frontend..."
+echo "[3/5] Building frontend..."
 cd frontend
 npm install
 npm run build
 cd ..
 
 # 4. Install PM2 and Start/Restart Application
-echo "[4/4] Starting/restarting application..."
+echo "[4/5] Starting/restarting application with PM2..."
 if ! command -v pm2 >/dev/null 2>&1; then
   echo "PM2 o'rnatilmoqda..."
   sudo npm install -g pm2 || npm install -g pm2
@@ -63,5 +69,22 @@ fi
 
 pm2 restart reklama-backend || pm2 start backend/server.js --name "reklama-backend"
 pm2 save || true
+
+# 5. Setup Nginx Configuration
+echo "[5/5] Nginx sozlanmoqda..."
+sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+sudo cp reklam.hubservis.uz.conf /etc/nginx/sites-available/reklam.hubservis.uz
+sudo ln -sf /etc/nginx/sites-available/reklam.hubservis.uz /etc/nginx/sites-enabled/reklam.hubservis.uz
+
+# Remove default site if exists
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test and reload Nginx
+if sudo nginx -t >/dev/null 2>&1; then
+  sudo systemctl reload nginx || sudo service nginx reload || sudo systemctl restart nginx
+  echo "Nginx sozlandi va qayta ishga tushirildi!"
+else
+  echo "OGOHLANTIRISH: Nginx test xatosi. Iltimos, Nginx sozlamalarini tekshiring."
+fi
 
 echo "=== Deployment script finished successfully! ==="
