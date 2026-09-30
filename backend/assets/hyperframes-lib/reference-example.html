@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="uz" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>HubServis Reels (vertikal 9:16)</title>
+    <script src="assets/gsap.min.js"></script>
+    <script src="assets/icons.js"></script>
+    <style>
+      @font-face { font-family: "Unbounded"; src: url("assets/fonts/Unbounded.woff2") format("woff2"); font-weight: 200 900; }
+      @font-face { font-family: "Manrope"; src: url("assets/fonts/Manrope.woff2") format("woff2"); font-weight: 200 800; }
+      :root {
+        --ink: #071b2b; --ink-2: #102f47; --cream: #f3f0e8; --paper: #fffdf7;
+        --gold: #f2c84b; --gold-dark: #d8a91b; --mint: #b7e3d1; --blue: #acd6ed;
+        --line: rgba(7, 27, 43, .16); --muted: #5e6b72;
+        --display: "Unbounded", sans-serif; --body: "Manrope", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+      body { font-family: var(--body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+      .scene { position: absolute; inset: 0; overflow: hidden; }
+      .abs { position: absolute; }
+      .dark { background: var(--ink); color: #fff; }
+      .paper { background: var(--paper); }
+      .cream { background: var(--cream); }
+      .mint { background: var(--mint); }
+      .blue { background: var(--blue); }
+      .goldbg { background: var(--gold); }
+      .h { font-family: var(--display); font-weight: 800; letter-spacing: -.05em; line-height: 1; }
+      .ln { display: block; overflow: hidden; padding-bottom: .06em; margin-bottom: -.06em; }
+      .ln > .in { display: inline-block; }
+      .g { color: var(--gold); }
+      .gd { color: #9a6b06; } /* oq fonda kontrast uchun quyuqroq oltin */
+      .ic { display: inline-grid; place-items: center; }
+      .ic svg { width: 100%; height: 100%; }
+      .gridbg { position: absolute; inset: 0; opacity: .18;
+        background-image: linear-gradient(rgba(255,255,255,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.18) 1px, transparent 1px);
+        background-size: 64px 64px; -webkit-mask-image: linear-gradient(to top, black, transparent 80%); mask-image: linear-gradient(to top, black, transparent 80%); }
+      .gridbg.inkgrid { background-image: linear-gradient(rgba(7,27,43,.10) 1px, transparent 1px), linear-gradient(90deg, rgba(7,27,43,.10) 1px, transparent 1px); opacity: 1; }
+
+      /* Ekran maketi: vertikal Reels uchun markazda */
+      .phone { position: absolute; border-radius: 88px; background: var(--cream); overflow: hidden; border: 20px solid var(--ink); box-shadow: 0 60px 140px rgba(0, 0, 0, .5); }
+      .notch { position: absolute; top: 0; left: 50%; width: 220px; height: 46px; margin-left: -110px; background: var(--ink); border-radius: 0 0 30px 30px; z-index: 9; }
+      .ps { position: absolute; inset: 0; padding: 78px 34px 30px; }
+
+      /* Sarlavha (ovozsiz ko'rish uchun) */
+      .cap { position: absolute; left: 60px; right: 60px; text-align: center; }
+      .cap .eb { display: inline-flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+      .cap .eb::before { content: ""; width: 40px; height: 4px; background: currentColor; }
+      .cap h2 { font-family: var(--display); font-weight: 800; letter-spacing: -.05em; line-height: 1; margin-top: 18px; }
+
+      /* ---------- S1 hook ---------- */
+      .arc { position: absolute; border-radius: 50%; border: 150px solid rgba(242, 200, 75, .92); }
+      #s1-logo { left: 50%; top: 560px; width: 300px; height: 300px; margin-left: -150px; border-radius: 76px; overflow: hidden; background: #fff; box-shadow: 0 40px 100px rgba(0,0,0,.55), 0 0 0 16px rgba(255,255,255,.07); }
+      #s1-logo img { width: 100%; height: 100%; }
+      #s1-h { left: 60px; right: 60px; top: 960px; text-align: center; font-size: 150px; text-transform: uppercase; color: #fff; }
+      #s1-sub { left: 100px; right: 100px; top: 1330px; text-align: center; font-size: 34px; color: rgba(255,255,255,.76); line-height: 1.45; font-weight: 500; }
+      #s1-pills { left: 0; right: 0; top: 1520px; display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; padding: 0 120px; }
+      .pill { display: inline-flex; align-items: center; gap: 12px; height: 68px; padding: 0 28px; border-radius: 999px; border: 2px solid currentColor; font-size: 26px; font-weight: 800; }
+      .pill .ic { width: 30px; height: 30px; }
+      .float { position: absolute; width: 120px; height: 120px; border-radius: 32px; display: grid; place-items: center; box-shadow: 0 24px 50px rgba(0,0,0,.4); }
+      .float .ic { width: 62px; height: 62px; color: var(--ink); }
+
+      /* ---------- Ilova ekrani (umumiy) ---------- */
+      .app-head { display: flex; align-items: center; justify-content: space-between; }
+      .app-logo { font-family: var(--display); font-weight: 800; font-size: 44px; letter-spacing: -.06em; }
+      .bell { position: relative; width: 62px; height: 62px; color: var(--ink); }
+      .bell .bdg { position: absolute; right: -6px; top: -8px; width: 34px; height: 34px; border-radius: 50%; background: #e0453c; color: #fff; font-size: 20px; font-weight: 800; display: grid; place-items: center; }
+      .avar { width: 66px; height: 66px; border-radius: 50%; background: var(--ink); color: var(--gold); display: grid; place-items: center; font-weight: 800; font-size: 30px; }
+      .chips { display: flex; gap: 16px; margin-top: 26px; }
+      .chipw { flex: 1; height: 84px; border-radius: 999px; background: #fff; display: flex; align-items: center; gap: 12px; padding: 0 24px; font-size: 24px; font-weight: 700; box-shadow: 0 8px 20px rgba(7,27,43,.07); white-space: nowrap; overflow: hidden; }
+      .chipw .ic { width: 32px; height: 32px; color: var(--gold-dark); flex: none; }
+      .banner { position: relative; margin-top: 22px; height: 300px; border-radius: 44px; background: linear-gradient(135deg, #0d2439 0%, #24455f 45%, #cfd6dc 100%); overflow: hidden; }
+      .banner .off { position: absolute; left: 26px; top: 22px; padding: 8px 20px; border-radius: 999px; border: 2px solid rgba(255,255,255,.5); color: #fff; font-size: 26px; font-weight: 800; }
+      .banner b { position: absolute; left: 26px; top: 92px; font-family: var(--display); font-size: 50px; font-weight: 800; letter-spacing: -.05em; color: #fff; }
+      .banner span { position: absolute; left: 28px; top: 160px; font-size: 26px; color: rgba(255,255,255,.75); font-weight: 600; }
+      .banner .btn { position: absolute; left: 26px; top: 208px; height: 68px; padding: 0 34px; border-radius: 999px; background: #fff; color: var(--ink); display: inline-flex; align-items: center; font-size: 26px; font-weight: 800; }
+      .sec { display: flex; align-items: center; gap: 16px; margin: 26px 0 18px; }
+      .sec i { width: 8px; height: 34px; background: var(--gold); border-radius: 4px; }
+      .sec b { font-family: var(--display); font-size: 28px; letter-spacing: .12em; font-weight: 700; }
+      .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .tool { height: 218px; border-radius: 34px; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 12px 30px rgba(7,27,43,.07); padding: 12px; }
+      .tool img { width: 178px; height: 178px; object-fit: contain; }
+      .tool b { font-family: var(--display); font-size: 24px; font-weight: 800; letter-spacing: -.04em; text-align: center; }
+      .tool span { font-size: 18px; color: var(--muted); font-weight: 700; text-align: center; }
+      .allrow { margin-top: 18px; height: 110px; border-radius: 34px; background: #fff; display: flex; align-items: center; gap: 20px; padding: 0 26px; box-shadow: 0 12px 30px rgba(7,27,43,.07); }
+      .allrow .sq { width: 84px; height: 84px; border-radius: 26px; background: #fdf3d4; display: grid; place-items: center; }
+      .allrow .sq .ic { width: 44px; height: 44px; color: var(--gold-dark); }
+      .allrow b { font-family: var(--display); font-size: 34px; font-weight: 800; letter-spacing: -.045em; }
+      .allrow .go { margin-left: auto; width: 84px; height: 84px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; }
+      .allrow .go .ic { width: 40px; height: 40px; }
+      .nav { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; background: #fff; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -8px 24px rgba(7,27,43,.06); }
+      .nav .it { text-align: center; color: var(--muted); font-size: 22px; font-weight: 700; }
+      .nav .it .ic { width: 46px; height: 46px; margin: 0 auto 6px; display: grid; }
+      .nav .it.on { color: var(--ink); }
+      .nav .orb { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8f7bff 0%, #4b2fd6 40%, #10203c 100%); box-shadow: 0 0 0 10px rgba(90,60,220,.15); }
+
+      /* ---------- AiHub ---------- */
+      .aibar { display: flex; align-items: center; justify-content: space-between; font-size: 30px; font-weight: 800; }
+      .aibar .t { font-family: var(--display); font-size: 40px; letter-spacing: -.05em; }
+      .aibar .r { display: flex; gap: 22px; align-items: center; }
+      .aibar .ic { width: 42px; height: 42px; }
+      .pcard { display: flex; align-items: center; gap: 18px; background: #fff; border: 2px solid var(--line); border-radius: 30px; padding: 20px; margin-top: 18px; }
+      .pcard .av { width: 76px; height: 76px; border-radius: 50%; background: #fdf3d4; display: grid; place-items: center; flex: none; }
+      .pcard .av .ic { width: 42px; height: 42px; color: var(--gold-dark); }
+      .pcard .nm { font-size: 28px; font-weight: 800; }
+      .pcard .mt { font-size: 23px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+      .pcard .btn { margin-left: auto; height: 76px; padding: 0 26px; border-radius: 22px; background: var(--gold); font-size: 26px; font-weight: 800; display: inline-flex; align-items: center; gap: 10px; }
+      .pcard .btn .ic { width: 30px; height: 30px; }
+      .ub { margin: 26px 0 0 auto; width: 78%; background: var(--ink); color: #fff; border-radius: 34px 34px 10px 34px; padding: 24px 30px; font-size: 32px; font-weight: 700; }
+      .ub .w { display: inline-block; white-space: nowrap; }
+      .ub .c { display: inline-block; }
+      .bron { margin-top: 24px; background: #fff; border-radius: 34px; padding: 30px; box-shadow: 0 16px 40px rgba(7,27,43,.08); }
+      .bron h4 { font-size: 30px; font-weight: 800; }
+      .bron .row { display: flex; align-items: center; gap: 14px; margin-top: 16px; font-size: 28px; font-weight: 700; }
+      .bron .row .ic { width: 34px; height: 34px; color: var(--gold-dark); }
+      .bron .box { border: 2px solid var(--line); border-radius: 26px; padding: 18px 22px; margin-top: 20px; }
+      .bron .box .top { display: flex; align-items: center; gap: 14px; }
+      .bron .box .top b { font-size: 27px; font-weight: 800; }
+      .bron .box .top .btn { margin-left: auto; height: 64px; padding: 0 22px; border-radius: 20px; background: var(--gold); font-size: 24px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; }
+      .bron .box .top .btn .ic { width: 26px; height: 26px; }
+      .bron .box .sm { font-size: 22px; color: var(--muted); font-weight: 700; margin-top: 6px; }
+      .bron .price { margin-top: 20px; font-size: 30px; font-weight: 800; }
+      .bron .ask { font-size: 26px; font-weight: 600; margin-top: 8px; }
+      .bron .ok { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 26px; font-weight: 700; }
+      .bron .ok .ic { width: 32px; height: 32px; }
+      .bron .warn { display: flex; gap: 12px; margin-top: 14px; background: #fdf3d4; border-radius: 20px; padding: 16px 18px; font-size: 24px; font-weight: 700; line-height: 1.35; }
+      .bron .warn .ic { width: 30px; height: 30px; flex: none; color: var(--gold-dark); }
+      .qchips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .qchips div { height: 56px; padding: 0 20px; border-radius: 999px; border: 2px solid var(--line); background: #fff; display: inline-flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 700; }
+      .qchips .ic { width: 26px; height: 26px; }
+      .inp { position: absolute; left: 34px; right: 34px; bottom: 34px; display: flex; align-items: center; gap: 16px; }
+      .inp .cam { width: 66px; height: 66px; color: var(--ink); }
+      .inp .fld { flex: 1; height: 84px; border-radius: 999px; border: 2px solid var(--line); background: #fff; display: flex; align-items: center; padding: 0 28px; font-size: 26px; color: var(--muted); font-weight: 600; }
+      .inp .mic { width: 88px; height: 88px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; }
+      .inp .mic .ic { width: 44px; height: 44px; }
+
+      /* ---------- Fitnes ---------- */
+      .fit-title { font-family: var(--display); font-weight: 800; font-size: 46px; letter-spacing: -.05em; text-align: center; }
+      .exrow { display: flex; align-items: center; gap: 20px; background: #eceff1; border-radius: 26px; padding: 18px; margin-top: 26px; }
+      .exrow .th { width: 120px; height: 86px; border-radius: 16px; background: #fff; display: grid; place-items: center; }
+      .exrow .th .ic { width: 60px; height: 60px; color: var(--ink); }
+      .exrow b { font-size: 28px; font-weight: 800; }
+      .exrow span { display: block; font-size: 22px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+      .exrow .dot { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; border: 5px solid #c3cbd2; }
+      .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 1290px; background: #fff; border-radius: 56px 56px 0 0; padding: 40px 44px; }
+      .sheet .bar { width: 120px; height: 10px; border-radius: 6px; background: #d3d9de; margin: 0 auto 30px; }
+      .sheet h3 { font-family: var(--display); font-weight: 800; font-size: 54px; letter-spacing: -.05em; }
+      .sheet .meta { font-size: 24px; color: var(--muted); font-weight: 600; margin-top: 12px; }
+      .figure { margin: 30px auto 0; width: 100%; height: 400px; border-radius: 34px; background: linear-gradient(160deg, #f7f9fa, #e8edf0); display: grid; place-items: center; position: relative; overflow: hidden; }
+      .figure .ic { width: 240px; height: 240px; color: var(--ink); opacity: .82; }
+      .figure .badge { position: absolute; right: 22px; top: 22px; padding: 10px 20px; border-radius: 999px; background: var(--gold); font-size: 22px; font-weight: 800; }
+      .figure .tag { position: absolute; left: 22px; bottom: 22px; display: flex; gap: 10px; flex-wrap: wrap; width: calc(100% - 44px); }
+      .figure .tag span { padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.9); font-size: 20px; font-weight: 800; color: var(--ink); }
+      .steps { margin-top: 30px; }
+      .steps h5 { font-size: 30px; font-weight: 800; }
+      .steps ol { margin: 18px 0 0 22px; }
+      .steps li { font-size: 24px; line-height: 1.45; color: #2b3a44; margin-bottom: 16px; font-weight: 600; }
+      .steps li b { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fdf3d4; color: var(--ink); font-size: 22px; margin-right: 4px; }
+
+      /* ---------- Kaloriya ---------- */
+      .cal-head { text-align: center; font-size: 34px; font-weight: 800; }
+      .cal-day { margin-top: 26px; display: flex; align-items: center; justify-content: center; gap: 60px; font-size: 34px; font-weight: 800; }
+      .cal-card { margin-top: 24px; border-radius: 40px; background: #fff; padding: 34px; display: flex; align-items: center; gap: 34px; box-shadow: 0 12px 30px rgba(7,27,43,.07); }
+      .ring { position: relative; width: 260px; height: 260px; flex: none; }
+      .ring svg { transform: rotate(-90deg); }
+      .ring .mid { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+      .ring .mid b { font-family: var(--display); font-size: 52px; font-weight: 800; letter-spacing: -.05em; }
+      .ring .mid span { font-size: 20px; color: var(--muted); font-weight: 700; }
+      .cal-info b { font-size: 30px; font-weight: 800; }
+      .cal-info .lft { font-size: 24px; color: var(--muted); font-weight: 700; margin-top: 6px; }
+      .macro { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 24px; font-weight: 700; }
+      .macro i { width: 16px; height: 16px; border-radius: 50%; }
+      .mealsheet { position: absolute; left: 0; right: 0; bottom: 0; height: 1080px; background: #fff; border-radius: 56px 56px 0 0; padding: 40px 44px; }
+      .mealsheet .bar { width: 120px; height: 10px; border-radius: 6px; background: #d3d9de; margin: 0 auto 28px; }
+      .mealsheet h3 { font-family: var(--display); font-weight: 800; font-size: 52px; letter-spacing: -.05em; }
+      .mealsheet p { font-size: 25px; color: var(--muted); font-weight: 600; margin-top: 12px; line-height: 1.4; }
+      .mopt { display: flex; align-items: center; gap: 22px; border-radius: 30px; background: #f2f6fd; padding: 24px 26px; margin-top: 20px; }
+      .mopt .ic { width: 56px; height: 56px; flex: none; color: var(--gold-dark); }
+      .mopt b { font-size: 30px; font-weight: 800; }
+      .mopt span { display: block; font-size: 22px; color: var(--muted); font-weight: 600; margin-top: 4px; }
+      .mopt .ar { margin-left: auto; width: 44px; height: 44px; color: #98a6b3; }
+
+      /* ---------- Kategoriyalar ---------- */
+      #grid28 { position: absolute; left: 54px; right: 54px; top: 560px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .tile { position: relative; height: 168px; border-radius: 28px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; overflow: hidden; padding: 0 8px; }
+      .tile .tbg { position: absolute; inset: 0; background: var(--gold); opacity: 0; }
+      .tile .ib { position: relative; width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; color: var(--ink); }
+      .tile .ib .ic { width: 40px; height: 40px; }
+      .tile .tn { position: relative; min-width: 0; font-size: 19px; font-weight: 800; line-height: 1.15; color: #fff; text-align: center; overflow-wrap: anywhere; }
+
+      /* ---------- Xavfsizlik ---------- */
+      #shield { left: 50%; top: 430px; width: 360px; height: 420px; margin-left: -180px; }
+      #pncard { left: 90px; right: 90px; top: 900px; border-radius: 44px; background: var(--ink); color: #fff; padding: 40px; }
+      #pncard small { font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+      #pn { margin-top: 20px; display: flex; font-family: var(--display); font-weight: 700; font-size: 56px; letter-spacing: -.02em; }
+      #pn .d { position: relative; display: inline-block; width: 40px; height: 74px; text-align: center; }
+      #pn .d.sp { width: 22px; }
+      #pn .d .a, #pn .d .b { position: absolute; left: 0; right: 0; top: 0; }
+      #pn .d .b { color: var(--gold); }
+      #pncard .via { margin-top: 40px; display: flex; gap: 14px; }
+      #pncard .via div { height: 74px; padding: 0 26px; border-radius: 999px; border: 2px solid rgba(255,255,255,.32); display: inline-flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; }
+      #pncard .via .ic { width: 32px; height: 32px; color: var(--gold); }
+      #s7-note { left: 90px; right: 90px; top: 1290px; text-align: center; font-size: 30px; font-weight: 700; color: #fff; line-height: 1.45; }
+
+      /* ---------- CTA ---------- */
+      #s8-logo { left: 50%; top: 470px; width: 280px; height: 280px; margin-left: -140px; border-radius: 72px; overflow: hidden; background: #fff; box-shadow: 0 40px 100px rgba(0,0,0,.55); }
+      #s8-logo img { width: 100%; height: 100%; }
+      #s8-h { left: 60px; right: 60px; top: 830px; text-align: center; font-size: 118px; text-transform: uppercase; color: #fff; }
+      #s8-lead { left: 90px; right: 90px; top: 1180px; text-align: center; font-size: 32px; color: rgba(255,255,255,.75); line-height: 1.45; }
+      #s8-btns { left: 0; right: 0; top: 1360px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+      .btn2 { display: inline-flex; align-items: center; gap: 18px; height: 108px; padding: 0 46px; border-radius: 999px; font-size: 34px; font-weight: 800; }
+      .btn2 .ic { width: 44px; height: 44px; }
+      .btn2.gold { background: var(--gold); color: var(--ink); }
+      .btn2.line { border: 3px solid rgba(255,255,255,.5); color: #fff; }
+      #s8-web { left: 90px; right: 90px; top: 1620px; text-align: center; font-family: var(--display); font-size: 40px; font-weight: 800; color: #fff; letter-spacing: -.04em; }
+      #s8-foot { left: 90px; right: 90px; bottom: 40px; text-align: center; font-size: 22px; font-weight: 700; color: rgba(255,255,255,.5); }
+
+      #blackout { position: absolute; inset: 0; background: #000; }
+      .swipe { position: absolute; left: -300px; top: 0; width: 2100px; height: 1920px; background: var(--gold); z-index: 60; }
+      .swipe.d { background: var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="40" data-width="1080" data-height="1920">
+
+      <!-- S1 HOOK (0-4) -->
+      <div id="s1" class="scene dark clip" data-start="0" data-duration="4.6" data-track-index="1">
+        <div class="gridbg"></div>
+        <div class="arc" id="s1-arc" style="width:1500px;height:1500px;left:-460px;top:-620px"></div>
+        <div id="s1-logo" class="abs"><img src="assets/img/logo.png" alt="HubServis" /></div>
+        <div class="float" id="f1" style="left:170px;top:400px;background:var(--gold)" data-fi="scissors"></div>
+        <div class="float" id="f2" style="right:170px;top:470px;background:var(--mint)" data-fi="wrench"></div>
+        <div class="float" id="f3" style="left:180px;top:690px;background:var(--blue)" data-fi="robot"></div>
+        <div class="float" id="f4" style="right:180px;top:740px;background:var(--cream)" data-fi="shield-check"></div>
+        <div id="s1-h" class="abs h"><span class="ln"><span class="in">Kerakli</span></span><span class="ln g"><span class="in">xizmat.</span></span></div>
+        <div id="s1-sub" class="abs">Ustani toping, ishni e'lon qiling yoki buyumingizni soting. Hammasi bitta xavfsiz ilovada.</div>
+        <div id="s1-pills" class="abs">
+          <div class="pill" data-i="scissors">28 xizmat</div>
+          <div class="pill" data-i="robot">AI yordamchi</div>
+          <div class="pill" data-i="shield-check">Xavfsiz</div>
+        </div>
+      </div>
+
+      <!-- S2 ILOVA BOSH SAHIFASI (4-10) -->
+      <div id="s2" class="scene mint light clip" data-start="3.4" data-duration="7.2" data-track-index="2">
+        <div class="cap" style="top:150px;color:var(--ink)">
+          <div class="eb">Kundalik vositalar</div>
+          <h2 style="font-size:74px"><span class="ln"><span class="in">Ilova ichida <span class="gd">hammasi</span></span></span></h2>
+        </div>
+        <div class="phone" id="ph2" style="left:150px;top:430px;width:780px;height:1460px">
+          <div class="notch"></div>
+          <div class="ps" id="home">
+            <div class="app-head">
+              <div class="app-logo">HUBSERVIS</div>
+              <div style="display:flex;align-items:center;gap:22px">
+                <div class="bell"><span class="ic" style="width:62px;height:62px" data-i="bell"></span><span class="bdg">4</span></div>
+                <div class="avar">S</div>
+              </div>
+            </div>
+            <div class="chips">
+              <div class="chipw"><span class="ic" data-i="sunglasses"></span>23.6°C, Tashkent</div>
+              <div class="chipw"><span class="ic" data-i="currency-circle-dollar"></span>EUR 1 = 13482.19</div>
+            </div>
+            <div class="banner" id="promo">
+              <div class="off">−25%</div>
+              <b>sartaroshlar</b>
+              <span>25-avgust</span>
+              <div class="btn">KO'RISH</div>
+            </div>
+            <div class="sec"><i></i><b>KUNDALIK VOSITALAR</b></div>
+            <div class="tools" id="tools"></div>
+            <div class="allrow">
+              <div class="sq"><span class="ic" data-i="dots-nine"></span></div>
+              <b>Barcha xizmatlar</b>
+              <div class="go"><span class="ic" data-i="caret-right"></span></div>
+            </div>
+          </div>
+          <div class="nav" id="homeNav"></div>
+        </div>
+      </div>
+
+      <!-- S3 AIHUB (10-16) -->
+      <div id="s3" class="scene paper light clip" data-start="9.4" data-duration="7.2" data-track-index="3">
+        <div class="cap" style="top:150px;color:var(--ink)">
+          <div class="eb">AI yordamchi</div>
+          <h2 style="font-size:74px"><span class="ln"><span class="in">Yozdingizmi —</span></span><span class="ln"><span class="in"><span class="gd">o'zi bron qiladi</span></span></span></h2>
+        </div>
+        <div class="phone" id="ph3" style="left:110px;top:400px;width:860px;height:1490px">
+          <div class="notch"></div>
+          <div class="ps" id="aihub">
+            <div class="aibar">
+              <span class="ic" style="width:44px;height:44px" data-i="caret-left"></span>
+              <div class="t">AiHub</div>
+              <div class="r"><span>AA</span><span class="ic" data-i="squares-four"></span><span class="ic" data-i="arrow-clockwise"></span></div>
+            </div>
+            <div class="pcard" id="pc1"><div class="av"><span class="ic" data-i="storefront"></span></div><div><div class="nm">Rustam — uyga xiz…</div><div class="mt">★ 4.7 · 📍 Toshkent</div></div><div class="btn"><span class="ic" data-i="calendar-check"></span>Bron</div></div>
+            <div class="pcard" id="pc2"><div class="av"><span class="ic" data-i="storefront"></span></div><div><div class="nm">Aziz — mobil sartar…</div><div class="mt">★ 4.9 · 📍 Toshkent</div></div><div class="btn"><span class="ic" data-i="calendar-check"></span>Bron</div></div>
+            <div class="ub" id="ub"></div>
+            <div class="bron" id="bron">
+              <h4>Bron tafsilotlarini tekshiring 👈</h4>
+              <div class="row"><span class="ic" data-i="storefront"></span>Premium Cut</div>
+              <div class="row"><span class="ic" data-i="scissors"></span>Soch olish</div>
+              <div class="row"><span class="ic" data-i="calendar-dots"></span>Ertaga, 15-sentabr, 17:00</div>
+              <div class="box">
+                <div class="top"><div class="av" style="width:64px;height:64px;border-radius:50%;background:#fdf3d4;display:grid;place-items:center"><span class="ic" style="width:36px;height:36px;color:var(--gold-dark)" data-i="storefront"></span></div><div><b>Premium Cut</b><div class="sm">★ 4.9 · 📍 Chilonzor t…</div></div><div class="btn"><span class="ic" data-i="calendar-check"></span>Bron</div></div>
+              </div>
+              <div class="price">💰 50 000 so'm</div>
+              <div class="ask">Narx to'g'rimi? Shu holatda tasdiqlaysizmi?</div>
+              <div class="ok" id="okrow"><span class="ic" data-i="check-square"></span>Tasdiqlash</div>
+              <div class="warn"><span class="ic" data-i="warning"></span>Eslatma: ertaga 17:00 da majlisingiz ham bor — vaqt to'qnashadi.</div>
+            </div>
+            <div class="qchips" id="qchips"></div>
+          </div>
+          <div class="inp">
+            <span class="ic cam" data-i="camera"></span>
+            <div class="fld">Xabar yozish…</div>
+            <div class="mic"><span class="ic" data-i="microphone"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 FITNES (16-22) -->
+      <div id="s4" class="scene cream light clip" data-start="15.4" data-duration="7.2" data-track-index="4">
+        <div class="cap" style="top:120px;color:var(--ink)">
+          <div class="eb">Fitnes</div>
+          <h2 style="font-size:70px"><span class="ln"><span class="in">Mashq <span class="gd">texnikasi</span></span></span></h2>
+        </div>
+        <div class="phone" id="ph4" style="left:110px;top:420px;width:860px;height:1470px">
+          <div class="notch"></div>
+          <div class="ps">
+            <div style="display:flex;align-items:center;gap:20px">
+              <span class="ic" style="width:40px;height:40px;color:var(--ink)" data-i="caret-left"></span>
+              <div class="fit-title" style="flex:1;text-align:center;padding-right:40px">Ko'krak, yelka va triseps</div>
+            </div>
+            <div class="exrow">
+              <div class="th"><span class="ic" data-i="barbell"></span></div>
+              <div><b>skapula push-up</b><span>3 yondashuv × 15 takror · dam 45s</span></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+          <div class="sheet" id="sheet4">
+            <div class="bar"></div>
+            <h3>skapula push-up</h3>
+            <div class="meta">Ko'krak · Oldingi tishsimon mushak · O'z vazni bilan</div>
+            <div class="figure">
+              <span class="ic" data-i="person-simple"></span>
+              <div class="badge">Ko'krak + yelka</div>
+              <div class="tag"><span>O'z vazni</span><span>3 × 15</span><span>dam 45s</span></div>
+            </div>
+            <div class="steps">
+              <h5>Bajarish tartibi</h5>
+              <ol>
+                <li id="st1"><b>1</b>Yuqori plank holatida boshlang, qo'llaringiz to'g'ridan-to'g'ri yelkangiz ostida va tanangiz to'g'ri chiziqda.</li>
+                <li id="st2"><b>2</b>Ko'kragingizni yerga tushiring, tirsaklaringizni tanangizga yaqin tuting.</li>
+                <li id="st3"><b>3</b>Tushayotganingizda, yelkangizni birlashtirib, ko'kragingizni oldinga suring.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 KALORIYA (22-26) -->
+      <div id="s5" class="scene paper light clip" data-start="21.4" data-duration="5.2" data-track-index="5">
+        <div class="cap" style="top:120px;color:var(--ink)">
+          <div class="eb">Kaloriya</div>
+          <h2 style="font-size:70px"><span class="ln"><span class="in">Bir <span class="gd">suratda</span> hisob</span></span></h2>
+        </div>
+        <div class="phone" id="ph5" style="left:110px;top:420px;width:860px;height:1470px">
+          <div class="notch"></div>
+          <div class="ps">
+            <div class="cal-head">Kaloriya hisoblagich</div>
+            <div class="cal-day"><span class="ic" style="width:36px;height:36px" data-i="caret-left"></span>Bugun<span class="ic" style="width:36px;height:36px;opacity:.35" data-i="caret-right"></span></div>
+            <div class="cal-card">
+              <div class="ring">
+                <svg width="260" height="260" viewBox="0 0 260 260">
+                  <circle cx="130" cy="130" r="112" fill="none" stroke="#e8edf1" stroke-width="20" />
+                  <circle id="ringArc" cx="130" cy="130" r="112" fill="none" stroke="#f2c84b" stroke-width="20" stroke-linecap="round" stroke-dasharray="704" stroke-dashoffset="704" />
+                </svg>
+                <div class="mid"><b id="kcal">0</b><span>kkal</span></div>
+              </div>
+              <div class="cal-info">
+                <b>Maqsad: <span id="goal">2000</span> kkal</b>
+                <div class="lft"><span id="left">2000</span> kkal qoldi</div>
+                <div class="macro"><i style="background:#f2c84b"></i>Oqsil: <span id="m1">0</span> g</div>
+                <div class="macro"><i style="background:#e0973f"></i>Yog': <span id="m2">0</span> g</div>
+                <div class="macro"><i style="background:#3aa87a"></i>Uglevod: <span id="m3">0</span> g</div>
+              </div>
+            </div>
+          </div>
+          <div class="mealsheet" id="mealsheet">
+            <div class="bar"></div>
+            <h3>Nonushta qildingizmi?</h3>
+            <p>Nima yeganligingizni belgilang — kaloriya hisobiga qo'shiladi.</p>
+            <div class="mopt" id="mo1"><span class="ic" data-i="camera"></span><div><b>Rasmga olish</b><span>AI taomni aniqlab kaloriyani hisoblaydi</span></div><span class="ic ar" data-i="caret-right"></span></div>
+            <div class="mopt" id="mo2"><span class="ic" data-i="note-pencil"></span><div><b>Yozib berish</b><span>"2 ta non, choy" — AI kaloriyani taxminlaydi</span></div><span class="ic ar" data-i="caret-right"></span></div>
+            <div class="mopt" id="mo3"><span class="ic" data-i="skip-forward"></span><div><b>Yemadim / keyinroq</b><span>Bu ovqat bugun qayta so'ralmaydi</span></div><span class="ic ar" data-i="caret-right"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S6 28 KATEGORIYA (26-30) -->
+      <div id="s6" class="scene dark clip" data-start="25.4" data-duration="5.2" data-track-index="6">
+        <div class="gridbg"></div>
+        <div class="cap" style="top:150px;color:#fff">
+          <div class="eb g">Xizmatlar</div>
+          <h2 style="font-size:96px"><span class="ln"><span class="in g" id="cnt">28</span> <span class="in">yo'nalish</span></span></h2>
+          <div style="margin-top:16px;font-size:28px;font-weight:600;color:rgba(255,255,255,.72)">Sartaroshdan IT xizmatigacha — bitta ilovada</div>
+        </div>
+        <div id="grid28"></div>
+      </div>
+
+      <!-- S7 XAVFSIZLIK (30-35) -->
+      <div id="s7" class="scene goldbg light clip" data-start="29.4" data-duration="6.2" data-track-index="7">
+        <div class="cap" style="top:150px;color:var(--ink)">
+          <div class="eb">Xavfsizlik</div>
+          <h2 style="font-size:80px"><span class="ln"><span class="in">Raqamingiz</span></span><span class="ln"><span class="in">yashirin qoladi</span></span></h2>
+        </div>
+        <svg id="shield" class="abs" viewBox="0 0 260 300">
+          <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b2b45" /><stop offset="1" stop-color="#071b2b" /></linearGradient></defs>
+          <path d="M130 10 L240 50 V140 C240 215 190 265 130 290 C70 265 20 215 20 140 V50 Z" fill="rgba(7,27,43,.10)" stroke="url(#sg)" stroke-width="10" stroke-linejoin="round" />
+          <g id="lock"><rect x="90" y="140" width="80" height="66" rx="12" fill="#071b2b" /><path d="M104 140 V118 a26 26 0 0 1 52 0 V140" fill="none" stroke="#071b2b" stroke-width="12" stroke-linecap="round" /><circle cx="130" cy="170" r="9" fill="var(--gold)" /></g>
+        </svg>
+        <div id="pncard" class="abs">
+          <small>Ustaning ko'radigani</small>
+          <div id="pn"></div>
+          <div class="via"><div><span class="ic" data-i="chat-circle-dots"></span>Chat</div><div><span class="ic" data-i="phone-call"></span>Qo'ng'iroq</div></div>
+        </div>
+        <div id="s7-note" class="abs">Aloqa faqat ilova ichida · Ikki tomon tasdiqlaydi · Sharh faqat yakunlangan ishdan keyin</div>
+      </div>
+
+      <!-- S8 CTA (35-40) -->
+      <div id="s8" class="scene dark clip" data-start="34.4" data-duration="5.6" data-track-index="8">
+        <div class="gridbg"></div>
+        <div class="arc" id="s8-arc" style="width:1400px;height:1400px;right:-520px;top:-560px;border-width:120px"></div>
+        <div id="s8-logo" class="abs"><img src="assets/img/logo.png" alt="HubServis" /></div>
+        <div id="s8-h" class="abs h"><span class="ln"><span class="in">Hayotni</span></span><span class="ln g"><span class="in">osonlash-</span></span><span class="ln g"><span class="in">tiring.</span></span></div>
+        <div id="s8-lead" class="abs">HubServis App Store va Google Play'da. Yuklab oling va vaqtingizni tejang.</div>
+        <div id="s8-btns" class="abs">
+          <div class="btn2 gold" data-i="apple-logo">App Store</div>
+          <div class="btn2 line" data-i="google-play-logo">Google Play</div>
+        </div>
+        <div id="s8-web" class="abs">hubservis.uz</div>
+        <div id="s8-foot" class="abs">© 2026 HUBSERVIS · Instagram · Telegram</div>
+      </div>
+
+      <div class="swipe d" id="sw1"></div>
+      <div class="swipe" id="sw2"></div>
+      <div id="blackout" class="clip" data-start="39.2" data-duration="0.8" data-track-index="9"></div>
+      <audio id="bgm" data-start="0" data-duration="40" data-track-index="10" data-volume="0.85" src="assets/audio/bgm.wav"></audio>
+    </div>
+
+    <script>
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+      const ic = (n, st = "") => `<span class="ic" style="${st}">${window.ICONS[n] || ""}</span>`;
+      $$("[data-i]").forEach((el) => {
+        const n = el.getAttribute("data-i");
+        if (el.classList.contains("ic")) el.innerHTML = window.ICONS[n] || "";
+        else el.insertAdjacentHTML("afterbegin", ic(n));
+      });
+      $$("[data-fi]").forEach((el) => { el.innerHTML = ic(el.getAttribute("data-fi")); });
+
+      // --- Bosh sahifa: kundalik vositalar (ilovadagi haqiqiy kartalar) ---
+      const TOOLS = [
+        ["card_fitnes", "Fitness"], ["card_kalorie", "Kaloriya"], ["card_planner", "Rejalarim"],
+        ["card_moliya", "Moliyam"], ["card_bozor", "Aqlli Bozor"], ["card_budilnik", "Budilnik"],
+      ];
+      // Karta rasmlarining o'zida nom va tavsif chizilgan (ilovadagi kabi) — matn qo'shmaymiz
+      $("#tools").innerHTML = TOOLS.map(([f, t]) =>
+        `<div class="tool"><img src="assets/img/${f}.jpg" alt="${t}" /></div>`).join("");
+      $("#homeNav").innerHTML = [
+        ["house-simple", "Asosiy", 1], ["squares-four", "Xizmatlar", 0],
+        ["", "orb", 0],
+        ["chat-circle-dots", "Xabarlar", 0], ["receipt", "Buyurtmalar", 0],
+      ].map(([i, t, on]) => t === "orb" ? `<div class="orb"></div>` :
+        `<div class="it ${on ? "on" : ""}">${ic(i)}<div>${t}</div></div>`).join("");
+
+      // --- AiHub: foydalanuvchi xabari + tez amal chiplari ---
+      const UMSG = "soch olaman";
+      $("#ub").innerHTML = UMSG.split(" ").map((w) =>
+        `<span class="w">${w.split("").map((c) => `<span class="c">${c}</span>`).join("")}</span>`).join(" ");
+      const QCH = [["wrench", "E'lon"], ["scissors", "Bron"], ["bell", "Eslatma"], ["wallet", "Moliya"],
+        ["barbell", "Fitness"], ["fork-knife", "Kaloriya"], ["tag", "Sotish"], ["sun-horizon", "Ob-havo"]];
+      $("#qchips").innerHTML = QCH.map(([i, t]) => `<div>${ic(i, "width:26px;height:26px")}${t}</div>`).join("");
+
+      // --- 28 kategoriya (nomlar ilova ro'yxatidan) ---
+      const CATS = [
+        ["scissors", "Sartarosh"], ["flower-lotus", "Salon"], ["wrench", "Santexnik"], ["lightning", "Elektrik"],
+        ["broom", "Tozalash"], ["car", "Avto-yordam"], ["soccer-ball", "Futbol maydoni"], ["hammer", "Usta"],
+        ["hard-hat", "Ishchi"], ["snowflake", "Konditsioner"], ["baby", "Enaga"], ["chalkboard-teacher", "Repetitor"],
+        ["bug", "Dezinfeksiya"], ["washing-machine", "Texnika ustasi"], ["moped", "Kuryer"], ["hand-heart", "Massaj"],
+        ["first-aid-kit", "Hamshira"], ["tooth", "Stomatologiya"], ["confetti", "Tadbirlar"], ["basket", "Bozorchi"],
+        ["cooking-pot", "Oshxona"], ["game-controller", "Game Zona"], ["barbell", "Sport maydonlari"], ["desktop", "Kompyuter ustasi"],
+        ["device-mobile", "Telefon ustasi"], ["code", "IT xizmatlari"], ["desktop", "Kompyuter Ustasi"], ["dots-three-circle", "Boshqa xizmatlar"],
+      ];
+      const TC = ["#f2c84b", "#b7e3d1", "#acd6ed", "#f3f0e8"];
+      $("#grid28").innerHTML = CATS.map(([i, n], k) =>
+        `<div class="tile"><div class="tbg"></div><div class="ib" style="background:${TC[k % 4]}">${ic(i)}</div><div class="tn">${n}</div></div>`).join("");
+
+      // Pastdan chiqadigan varaq (sheet) ro'yxat matnini yopadi — bu ataylab:
+      // shuning uchun yopiladigan matnlarni "ruxsat berilgan" deb belgilaymiz.
+      $$(".exrow > div, .exrow span, .cal-info > *, .cal-info .macro span, #kcal").forEach((el) =>
+        el.setAttribute("data-layout-allow-overlap", ""));
+
+      // --- Telefon raqami ---
+      const NUM = "+998 90 123 45 67", MASK = "+998 •• ••• •• ••";
+      $("#pn").innerHTML = NUM.split("").map((c, i) => c === " " ? `<span class="d sp"></span>` :
+        `<span class="d"><span class="a">${c}</span><span class="b">${MASK[i]}</span></span>`).join("");
+
+      // ============ Timeline ============
+      const tl = gsap.timeline({ paused: true });
+      const E = "power3.out", IO = "power3.inOut";
+      const B = [0, 4, 10, 16, 22, 26, 30, 35, 40];
+      const S = ["#s1", "#s2", "#s3", "#s4", "#s5", "#s6", "#s7", "#s8"];
+      const lines = (sel, t, st = 0.1) => tl.fromTo(sel + " .ln > .in", { yPercent: 115 }, { yPercent: 0, duration: 0.7, stagger: st, ease: "power4.out" }, t);
+
+      tl.set(["#sw1", "#sw2"], { x: -2400 }, 0);
+      for (let i = 1; i < S.length; i++) {
+        tl.fromTo(S[i], { yPercent: 100 }, { yPercent: 0, duration: 0.6, ease: IO, immediateRender: false }, B[i] - 0.6);
+        tl.to(S[i - 1], { yPercent: -32, opacity: 0, duration: 0.6, ease: IO }, B[i] - 0.6);
+      }
+
+      // ===== S1 =====
+      tl.fromTo("#s1-arc", { scale: 0.35, rotation: -70 }, { scale: 1, rotation: -14, duration: 1.4, ease: "expo.out" }, 0);
+      tl.to("#s1-arc", { rotation: 12, duration: 3.4, ease: "none" }, 1.4);
+      tl.fromTo("#s1-logo", { scale: 0, rotation: -18 }, { scale: 1, rotation: 0, duration: 0.8, ease: "back.out(1.7)" }, 0.25);
+      tl.to("#s1-logo", { y: -18, duration: 1.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.1);
+      ["#f1", "#f2", "#f3", "#f4"].forEach((f, i) => {
+        tl.fromTo(f, { scale: 0, rotation: i % 2 ? 25 : -25 }, { scale: 1, rotation: i % 2 ? 7 : -7, duration: 0.5, ease: "back.out(2)" }, 0.5 + i * 0.14);
+        tl.to(f, { y: i % 2 ? 20 : -20, duration: 1.1, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.2 + i * 0.1);
+      });
+      lines("#s1-h", 0.7, 0.16);
+      tl.fromTo("#s1-sub", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 1.5);
+      tl.fromTo("#s1-pills .pill", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.12, ease: "back.out(2)" }, 2.0);
+
+      // ===== S2 bosh sahifa =====
+      tl.fromTo("#s2 .cap", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 4.0);
+      lines("#s2 .cap h2", 4.05, 0.1);
+      tl.fromTo("#ph2", { y: 500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: E }, 4.05);
+      tl.fromTo("#home .app-head, #home .chips", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: E }, 4.5);
+      tl.to("#ph2 .bdg", { scale: 1.25, duration: 0.25, yoyo: true, repeat: 3, ease: "sine.inOut" }, 5.4);
+      tl.fromTo("#promo", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.5, ease: E }, 5.6);
+      tl.fromTo(".sec", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 6.3);
+      tl.fromTo("#tools .tool", { opacity: 0, y: 60, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.12, ease: "back.out(1.7)" }, 6.5);
+      tl.to("#tools .tool", { y: -12, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.14, ease: "sine.inOut" }, 8.2);
+      tl.fromTo(".allrow", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: E }, 9.0);
+      tl.fromTo("#homeNav", { y: 160 }, { y: 0, duration: 0.5, ease: E }, 8.6);
+      tl.fromTo("#homeNav .it, #homeNav .orb", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.08, ease: E }, 9.0);
+      // chip almashinuvi (ekrandagi kurs kabi)
+      tl.to("#home .chipw:last-child", { x: 6, duration: 0.4, yoyo: true, repeat: 1, ease: "sine.inOut" }, 7.6);
+
+      // ===== S3 AiHub =====
+      tl.fromTo("#s3 .cap", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 10.0);
+      lines("#s3 .cap h2", 10.05, 0.1);
+      tl.fromTo("#ph3", { y: 500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: E }, 10.05);
+      tl.fromTo("#aihub .aibar", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: E }, 10.6);
+      tl.fromTo("#pc1", { opacity: 0, x: -70 }, { opacity: 1, x: 0, duration: 0.45, ease: E }, 10.9);
+      tl.fromTo("#pc2", { opacity: 0, x: -70 }, { opacity: 1, x: 0, duration: 0.45, ease: E }, 11.35);
+      tl.fromTo("#ub", { opacity: 0, y: 30, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, 11.9);
+      tl.fromTo("#ub .c", { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.035 }, 11.95);
+      tl.fromTo("#bron", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.55, ease: E }, 12.9);
+      tl.fromTo("#bron .row", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35, stagger: 0.16, ease: E }, 13.2);
+      tl.fromTo("#bron .box", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, 13.9);
+      tl.fromTo("#bron .price", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: E }, 14.3);
+      tl.fromTo("#bron .warn", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: E }, 14.6);
+      tl.fromTo("#okrow", { backgroundColor: "rgba(0,0,0,0)" }, { backgroundColor: "#fdf3d4", duration: 0.3 }, 14.5);
+      tl.to("#okrow", { x: 8, duration: 0.06, yoyo: true, repeat: 3 }, 14.8);
+      tl.fromTo("#qchips div", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: E }, 14.2);
+      tl.fromTo(".inp", { y: 140, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: E }, 14.4);
+
+      // ===== S4 Fitnes =====
+      tl.fromTo("#s4 .cap", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 16.0);
+      lines("#s4 .cap h2", 16.05, 0.1);
+      tl.fromTo("#ph4", { y: 500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: E }, 16.05);
+      tl.fromTo("#ph4 .fit-title", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: E }, 16.6);
+      tl.fromTo(".exrow", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: E }, 16.9);
+      tl.fromTo(".exrow .dot", { scale: 1 }, { scale: 1.14, borderColor: "#f2c84b", duration: 0.3, yoyo: true, repeat: 3, ease: "sine.inOut" }, 17.6);
+      tl.fromTo(".exrow .th .ic", { scale: 0.4, rotation: -25 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.4)" }, 17.2);
+      tl.fromTo("#sheet4", { y: 1400 }, { y: 0, duration: 0.7, ease: "expo.out" }, 18.0);
+      tl.fromTo("#sheet4 h3, #sheet4 .meta", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.12, ease: E }, 18.4);
+      tl.fromTo(".figure", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 18.9);
+      tl.fromTo(".figure .ic", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 0.82, duration: 0.6, ease: "back.out(1.8)" }, 19.1);
+      tl.fromTo(".figure .badge", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 19.5);
+      tl.fromTo(".figure .tag span", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.1, ease: E }, 19.7);
+      tl.fromTo(".steps h5", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.35, ease: E }, 20.0);
+      ["#st1", "#st2", "#st3"].forEach((s, i) => {
+        tl.fromTo(s, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: E }, 20.3 + i * 0.45);
+        tl.fromTo(s + " b", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(3)" }, 20.35 + i * 0.45);
+      });
+
+      // ===== S5 Kaloriya =====
+      tl.fromTo("#s5 .cap", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 22.0);
+      lines("#s5 .cap h2", 22.05, 0.1);
+      tl.fromTo("#ph5", { y: 500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: E }, 22.05);
+      tl.fromTo(".cal-head, .cal-day", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: E }, 22.6);
+      tl.fromTo(".cal-card", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 22.9);
+      tl.fromTo("#mealsheet", { y: 1100 }, { y: 0, duration: 0.6, ease: "expo.out" }, 22.7);
+      tl.fromTo("#mealsheet h3, #mealsheet p", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.1, ease: E }, 23.0);
+      tl.fromTo(".mopt", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.12, ease: E }, 23.3);
+      tl.to("#mo1", { scale: 1.03, duration: 0.25, yoyo: true, repeat: 3, ease: "sine.inOut" }, 23.9);
+      // AI suratni tahlil qiladi -> ko'rsatkichlar to'ladi (namuna qiymatlar)
+      const kcal = { v: 0 }, ring = $("#ringArc"), goal = 2000;
+      tl.fromTo(kcal, { v: 0 }, {
+        v: 520, duration: 1.4, ease: "power2.out",
+        onUpdate: () => {
+          const v = Math.round(kcal.v);
+          $("#kcal").textContent = v;
+          $("#left").textContent = goal - v;
+          $("#m1").textContent = Math.round(v * 0.18); $("#m2").textContent = Math.round(v * 0.3); $("#m3").textContent = Math.round(v * 0.52);
+          ring.setAttribute("stroke-dashoffset", 704 - 704 * (v / goal));
+        },
+      }, 24.5);
+
+      // ===== S6 Kategoriyalar =====
+      tl.fromTo("#s6 .cap", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 26.0);
+      lines("#s6 .cap h2", 26.05, 0.12);
+      const cnt = { v: 0 };
+      tl.fromTo(cnt, { v: 0 }, { v: 28, duration: 1, ease: "power2.out", onUpdate: () => { $("#cnt").textContent = Math.round(cnt.v); } }, 26.2);
+      tl.fromTo("#grid28 .tile", { opacity: 0, y: 30, scale: 0.85 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.6)", stagger: { each: 0.035, grid: [7, 4], from: "start" } }, 26.3);
+      $$("#grid28 .tile").forEach((tile, k) => {
+        const t = 27.4 + k * 0.08;
+        const base = TC[k % 4];
+        tl.set($(".tbg", tile), { opacity: 1 }, t);
+        tl.set($(".tn", tile), { color: "#071b2b" }, t);
+        tl.set($(".ib", tile), { backgroundColor: "#071b2b", color: "#f2c84b" }, t);
+        tl.set($(".tbg", tile), { opacity: 0 }, t + 0.28);
+        tl.set($(".tn", tile), { color: "#ffffff" }, t + 0.28);
+        tl.set($(".ib", tile), { backgroundColor: base, color: "#071b2b" }, t + 0.28);
+      });
+
+      // ===== S7 Xavfsizlik =====
+      tl.fromTo("#s7 .cap", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 30.0);
+      lines("#s7 .cap h2", 30.05, 0.1);
+      tl.fromTo("#shield", { scale: 0.3, opacity: 0, rotation: -18 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.7, ease: "back.out(1.7)" }, 30.2);
+      tl.fromTo("#lock", { y: -70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "bounce.out" }, 30.6);
+      tl.fromTo("#pncard", { opacity: 0, y: 90 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 30.8);
+      const dA = $$("#pn .d .a"), dB = $$("#pn .d .b");
+      tl.set(dB, { opacity: 0, y: 40 }, 30);
+      dA.forEach((a, i) => {
+        if (i < 4) return;
+        const t = 31.8 + (i - 4) * 0.14;
+        tl.to(a, { opacity: 0, y: -40, duration: 0.18 }, t);
+        tl.to(dB[i], { opacity: 1, y: 0, duration: 0.18 }, t + 0.04);
+      });
+      tl.fromTo("#pncard .via div", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.14, ease: E }, 33.2);
+      tl.fromTo("#s7-note", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 33.6);
+      tl.to("#shield", { scale: 1.05, duration: 0.4, yoyo: true, repeat: 3, ease: "sine.inOut" }, 31.6);
+
+      // ===== S8 CTA =====
+      tl.fromTo("#s8-arc", { scale: 0.3, rotation: 80 }, { scale: 1, rotation: -16, duration: 1.2, ease: "expo.out" }, 35.0);
+      tl.to("#s8-arc", { rotation: 10, duration: 4, ease: "none" }, 36.2);
+      tl.fromTo("#s8-logo", { scale: 0, rotation: 26 }, { scale: 1, rotation: 0, duration: 0.8, ease: "back.out(1.8)" }, 35.1);
+      tl.to("#s8-logo", { y: -16, duration: 1, yoyo: true, repeat: 2, ease: "sine.inOut" }, 36.0);
+      lines("#s8-h", 35.6, 0.14);
+      tl.fromTo("#s8-lead", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 36.6);
+      tl.fromTo("#s8-btns .btn2", { opacity: 0, y: 40, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.14, ease: "back.out(2)" }, 37.0);
+      tl.to("#s8-btns .gold", { scale: 1.05, duration: 0.45, yoyo: true, repeat: 3, ease: "sine.inOut" }, 38.0);
+      tl.fromTo("#s8-web", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: E }, 37.6);
+      tl.fromTo("#s8-foot", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 38.0);
+
+      // O'tishlar (swipe) va yakun
+      [10, 22].forEach((c) => {
+        tl.fromTo("#sw2", { x: -2400 }, { x: 2400, duration: 0.8, ease: "power2.inOut", immediateRender: false }, c - 0.5);
+        tl.fromTo("#sw1", { x: -2400 }, { x: 2400, duration: 0.8, ease: "power2.inOut", immediateRender: false }, c - 0.42);
+      });
+      tl.fromTo("#blackout", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power1.in" }, 39.2);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+[Unit]
+Description=AdForge AI Frontend (Vite dev server)
+After=network.target
+
+[Service]
+Type=simple
+User=gvazar
+WorkingDirectory=/home/gvazar/reklama/frontend
+ExecStart=/usr/bin/npm run dev -- --port 3030 --host 0.0.0.0
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/gvazar/reklama/logs/frontend.log
+StandardError=append:/home/gvazar/reklama/logs/frontend-error.log
+
+[Install]
+WantedBy=multi-user.target

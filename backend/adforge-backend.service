@@ -1,0 +1,22 @@
+[Unit]
+Description=AdForge AI Backend Server
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gvazar
+WorkingDirectory=/home/gvazar/reklama/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/home/gvazar/reklama/backend/.env
+ExecStart=/usr/bin/node /home/gvazar/reklama/backend/server.js
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/gvazar/reklama/logs/backend.log
+StandardError=append:/home/gvazar/reklama/logs/backend-error.log
+
+# Resurs cheklovlari
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

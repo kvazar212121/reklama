@@ -1,0 +1,14 @@
+{
+  "name": "adforge-backend",
+  "version": "1.0.0",
+  "description": "AdForge AI — Reklama Video Platformasi Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node --watch server.js",
+    "prod": "NODE_ENV=production node server.js"
+  },
+  "keywords": ["adforge", "ai", "video", "reklama"],
+  "author": "",
+  "license": "ISC"
+}

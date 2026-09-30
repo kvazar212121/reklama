@@ -1,0 +1,160 @@
+/* 5x2 GRID — YONMA-YON, CHEGARA YO'Q, BARCHASI KO'RINIB TURADI */
+.styles-grid-5x2 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0 20px;
+}
+
+.style-card-pro {
+  border-radius: 20px;
+  padding: 20px 16px;
+  min-height: 240px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.style-card-pro:hover {
+  transform: translateY(-5px);
+  filter: brightness(1.15);
+}
+
+.style-card-pro.selected {
+  transform: translateY(-4px);
+  border-color: var(--gold) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(242, 200, 75, 0.35) !important;
+}
+
+.style-card-pro.selected::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gold);
+}
+
+.style-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* Original SVG Icon container */
+.style-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.style-badge-tag {
+  font-family: var(--body);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.style-card-pro.selected .style-badge-tag {
+  background: var(--gold) !important;
+  color: var(--ink) !important;
+  border-color: var(--gold) !important;
+}
+
+.style-title-pro {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.style-desc-pro {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+/* Palette bar */
+.style-palette-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.palette-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Selected check indicator */
+.selected-check {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+/* Responsive grid rules */
+@media (max-width: 1200px) {
+  .styles-grid-5x2 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .styles-grid-5x2 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .styles-grid-5x2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .style-card-pro {
+    padding: 14px 12px;
+    min-height: 210px;
+  }
+  .style-title-pro {
+    font-size: 0.95rem;
+  }
+  .style-desc-pro {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,274 @@
+.upload-section {
+  padding: clamp(80px, 10vw, 140px) 0;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+}
+
+.upload-header {
+  margin-bottom: 48px;
+}
+
+.upload-header h2 {
+  font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+  text-transform: uppercase;
+  margin: 16px 0 12px;
+  color: var(--text-primary);
+}
+
+.upload-header p {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 650px;
+}
+
+/* USTMA-UST (VERTIKAL BIR QATOR) TARTIB */
+.upload-stacked-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.upload-card-panel {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
+
+.step-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.step-num {
+  color: var(--gold);
+  font-size: 1rem;
+}
+
+.idea-textarea {
+  resize: vertical;
+  min-height: 150px;
+  font-size: 15px;
+  line-height: 1.6;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+
+.idea-textarea:focus {
+  border-color: var(--gold);
+}
+
+.idea-char-count {
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* Duration Grid */
+.duration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.duration-btn {
+  padding: 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: var(--body);
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.duration-btn:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.duration-btn.active {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+  box-shadow: 0 4px 16px rgba(242, 200, 75, 0.35);
+}
+
+/* Dropzone (Katta keng maydon) */
+.image-dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 20px;
+  padding: 44px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bg-input);
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-dropzone:hover, .image-dropzone.drag-over {
+  border-color: var(--gold);
+  background: rgba(242, 200, 75, 0.08);
+}
+
+.image-dropzone.has-image {
+  padding: 0;
+  border-style: solid;
+  overflow: hidden;
+}
+
+.image-preview-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 380px;
+  aspect-ratio: 16 / 9;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 27, 43, 0.75);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-weight: 700;
+}
+
+.image-preview-wrapper:hover .image-overlay {
+  opacity: 1;
+}
+
+.dropzone-icon {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+
+.dropzone-text {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.dropzone-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Bir nechta rasm — grid ko'rinishi */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+}
+
+.image-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+}
+
+.image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-thumb-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(7, 27, 43, 0.75);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.image-thumb-remove:hover {
+  background: #ef4444;
+}
+
+.image-add-tile {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  border: 2px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--bg-input);
+  transition: all 0.2s ease;
+}
+
+.image-add-tile:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.image-add-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.error-msg {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 8px;
+  display: block;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .upload-card-panel {
+    padding: 22px 18px;
+  }
+  .duration-grid {
+    grid-template-columns: 1fr;
+  }
+}
