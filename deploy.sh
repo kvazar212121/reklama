@@ -4,13 +4,19 @@ set -e
 echo "=== AdForge Reklama Deploy Script ==="
 
 # 0. Check Node.js and npm installation
-if ! command -v node &> /devnull || ! command -v npm &> /devnull; then
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
   echo "[0/4] Node.js va npm topilmadi. Node.js v20 LTS o'rnatilmoqda..."
-  if command -v apt-get &> /devnull; then
+  if command -v apt-get >/dev/null 2>&1; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt-get install -y nodejs build-essential
+  elif command -v yum >/dev/null 2>&1; then
+    curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+    sudo yum install -y nodejs gcc-c++ make
   else
-    echo "XATO: apt-get topilmadi. Node.js v20 ni qo'lda o'rnating va qayta urinib ko'ring."
+    echo "XATO: apt-get yoki yum paket boshqaruvchisi topilmadi."
+    echo "Iltimos, Node.js v20 ni serveringizga qo'lda o'rnating:"
+    echo "  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+    echo "  sudo apt-get install -y nodejs"
     exit 1
   fi
 fi
@@ -50,7 +56,7 @@ cd ..
 
 # 4. Install PM2 and Start/Restart Application
 echo "[4/4] Starting/restarting application..."
-if ! command -v pm2 &> /devnull; then
+if ! command -v pm2 >/dev/null 2>&1; then
   echo "PM2 o'rnatilmoqda..."
   sudo npm install -g pm2 || npm install -g pm2
 fi
