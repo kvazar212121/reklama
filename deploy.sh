@@ -60,15 +60,16 @@ npm install
 npm run build
 cd ..
 
-# 4. Install PM2 and Start/Restart Application
-echo "[4/5] Starting/restarting application with PM2..."
-if ! command -v pm2 >/dev/null 2>&1; then
-  echo "PM2 o'rnatilmoqda..."
-  sudo npm install -g pm2 || npm install -g pm2
+# 4. Restart Application (systemd or PM2)
+echo "[4/5] Starting/restarting application..."
+if systemctl list-units --type=service | grep -q "adforge-backend"; then
+  sudo systemctl restart adforge-backend || true
 fi
 
-pm2 restart reklama-backend || pm2 start backend/server.js --name "reklama-backend"
-pm2 save || true
+if command -v pm2 >/dev/null 2>&1; then
+  pm2 restart reklama-backend || pm2 start backend/server.js --name "reklama-backend" || true
+  pm2 save || true
+fi
 
 # 5. Setup Nginx Configuration
 echo "[5/5] Nginx sozlanmoqda..."

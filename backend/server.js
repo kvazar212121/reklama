@@ -79,6 +79,12 @@ const uploadDir = path.resolve(process.env.UPLOAD_DIR || './uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/uploads', express.static(uploadDir));
 
+// ── Static fayllar: musiqa uslubi namunalari (Studio'da oldindan eshitish) ──
+const musicPreviewsDir = path.resolve(__dirname, 'assets/hubmusic/previews');
+if (!fs.existsSync(musicPreviewsDir)) fs.mkdirSync(musicPreviewsDir, { recursive: true });
+app.use('/music-previews', express.static(musicPreviewsDir));
+app.use('/music-previews', express.static(path.resolve(__dirname, 'assets/music')));
+
 // ── Routes ─────────────────────────────────────────────────────────────────
 app.use('/auth',         require('./routes/auth'));
 app.use('/api/videos',   require('./routes/videos'));
