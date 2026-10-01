@@ -7,7 +7,7 @@ import './UploadForm.css';
 
 const DURATIONS = ['s30', 's60'];
 const MAX_IMAGES = 5;
-const MAX_IDEA_LENGTH = 600;
+const MAX_IDEA_LENGTH = 1200;
 
 // Har bir stilga mos avtomatik musiqa va audio kayfiyati
 const STYLE_MOOD_MAP = {
@@ -244,7 +244,7 @@ export default function UploadForm() {
                 </div>
                 <div>
                   <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>Saqlash muddati: </span>
-                  <strong style={{ color: 'var(--gold)', fontSize: '13px' }}>24 soat (avtomatik o'chadi)</strong>
+                  <strong style={{ color: 'var(--gold)', fontSize: '13px' }}>15 kun (avtomatik o'chadi)</strong>
                 </div>
                 <div>
                   <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Format: <strong>1080p Full HD MP4</strong></span>

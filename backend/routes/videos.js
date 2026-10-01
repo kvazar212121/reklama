@@ -8,12 +8,32 @@ const { requireAuth, optionalAuth, checkAccess } = require('../middleware/auth')
 const { processNextJob } = require('../services/queue');
 const db = require('../models/db');
 const { VIDEO_STYLES } = require('../config/styles');
+const { MUSIC_STYLES, VALID_MUSIC_STYLE_IDS } = require('../config/musicStyles');
 
 const router = express.Router();
 
 // ── 10 ta professional video stillari ─────────────────────────────────────
 router.get('/styles', (req, res) => {
   res.json({ success: true, styles: VIDEO_STYLES });
+});
+
+// ── 10 ta musiqa uslubi (video dizayn stilidan mustaqil tanlanadi) ─────────
+router.get('/music-styles', (req, res) => {
+  res.json({ success: true, musicStyles: MUSIC_STYLES });
+});
+
+// ── Foydalanuvchiga qo'llaniladigan limitlar (frontend uchun) ─────────────
+router.get('/limits', (req, res) => {
+  res.json({
+    success: true,
+    limits: {
+      maxImages: MAX_IMAGES,
+      maxIdeaLength: MAX_IDEA_LENGTH,
+      durations: ['s30', 's60'],
+      freeCreditsPerUser: parseInt(db.getSetting('free_credits_per_user', '2'), 10),
+      freeTierEnabled: db.getSetting('free_tier_enabled', '1') === '1',
+    },
+  });
 });
 
 // ── Multer: rasm yuklash sozlamalari ──────────────────────────────────────
@@ -84,7 +104,7 @@ const uploadImages = (req, res, next) => {
   });
 };
 
-const MAX_IDEA_LENGTH = 600;
+const MAX_IDEA_LENGTH = 1200;
 
 // ── Video yaratish so'rovi ─────────────────────────────────────────────────
 // POST /api/videos/create
@@ -94,8 +114,12 @@ router.post('/create', optionalAuth, checkAccess, uploadImages, async (req, res)
       await Promise.all(req.files.map((f) => resizeImageInPlace(f.path)));
     }
 
-    const { idea, mood = 'energetic', duration = 's30', model = 'deepseek/deepseek-chat', style = 'cyberpunk_neon', aspectRatio = '9:16' } = req.body;
+    const { idea, mood = 'energetic', duration = 's30', model = 'deepseek/deepseek-chat', style = 'cyberpunk_neon', aspectRatio = '9:16', musicStyle = '' } = req.body;
     const aspect_ratio = req.body.aspect_ratio || aspectRatio || '9:16';
+
+    if (musicStyle && !VALID_MUSIC_STYLE_IDS.includes(musicStyle)) {
+      return res.status(400).json({ success: false, error: 'Noto\'g\'ri musiqa uslubi' });
+    }
 
     if (!idea || !idea.trim()) {
       return res.status(400).json({ success: false, error: 'Reklama g\'oyasi kiritilishi shart' });
@@ -160,9 +184,9 @@ router.post('/create', optionalAuth, checkAccess, uploadImages, async (req, res)
     // Job yaratish
     const jobId = uuidv4();
     db.prepare(`
-      INSERT INTO jobs (id, user_id, idea, mood, duration, image_paths, status, progress, model, style, aspect_ratio)
-      VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, ?, ?, ?)
-    `).run(jobId, userId, idea.trim(), mood, duration, imagePathsJson, model, style, aspect_ratio);
+      INSERT INTO jobs (id, user_id, idea, mood, duration, image_paths, status, progress, model, style, aspect_ratio, music_style)
+      VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, ?, ?, ?, ?)
+    `).run(jobId, userId, idea.trim(), mood, duration, imagePathsJson, model, style, aspect_ratio, musicStyle || null);
 
     // Queueni tetiklash
     setTimeout(processNextJob, 100);
@@ -221,19 +245,40 @@ router.get('/status/:jobId', optionalAuth, (req, res) => {
 router.get('/my', optionalAuth, (req, res) => {
   try {
     const userId = req.user ? req.user.id : 'guest_user';
-    const jobs = db.prepare(`
-      SELECT id, status, progress, mood, duration, output_path, error, created_at
+    const rows = db.prepare(`
+      SELECT id, status, progress, idea, mood, duration, style, image_paths, output_path, error, created_at
       FROM jobs WHERE user_id = ?
-      ORDER BY created_at DESC LIMIT 20
+      ORDER BY created_at DESC LIMIT 50
     `).all(userId);
 
-    const user = db.prepare('SELECT credits, role FROM users WHERE id = ?').get(userId);
+    const jobs = rows.map((job) => {
+      let imageCount = 0;
+      if (job.image_paths) {
+        try { imageCount = JSON.parse(job.image_paths).length; } catch (_) { imageCount = 0; }
+      }
+      return {
+        id: job.id,
+        status: job.status,
+        progress: job.progress,
+        idea: job.idea,
+        mood: job.mood,
+        duration: job.duration,
+        style: job.style,
+        imageCount,
+        error: job.error,
+        createdAt: job.created_at,
+        videoUrl: job.status === 'done' && job.output_path ? `/output/${path.basename(job.output_path)}` : null,
+      };
+    });
+
+    const user = db.prepare('SELECT credits, role, free_credits_claimed, created_at FROM users WHERE id = ?').get(userId);
 
     res.json({
       success: true,
       jobs,
       credits: user ? user.credits : 0,
       role: user ? user.role : 'user',
+      memberSince: user ? user.created_at : null,
     });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Server xatosi' });

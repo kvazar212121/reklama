@@ -2,13 +2,29 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import StyleSelector from '../components/StyleSelector';
+import MusicStyleSelector from '../components/MusicStyleSelector';
 import Navbar from '../components/Navbar';
 import { useTranslation } from 'react-i18next';
 import './StudioPage.css';
 
 const DURATIONS = ['s30', 's60'];
 const MAX_IMAGES = 5;
-const MAX_IDEA_LENGTH = 600;
+const MAX_IDEA_LENGTH = 1200;
+
+// Har bir dizayn stiliga mos "aqlli" boshlang'ich musiqa uslubi — foydalanuvchi
+// Musiqa Uslubi bosqichida istalganini keyin o'zi o'zgartirishi mumkin.
+const STYLE_MUSIC_MAP = {
+  cyberpunk_neon: 'kiberpank',
+  luxury_gold: 'oltin',
+  minimal_clean: 'minimal',
+  kinetic_typography: 'kinetik',
+  tiktok_viral: 'reels',
+  corporate_blue: 'biznes',
+  isometric_3d: 'izometriya',
+  retro_vintage: 'retro',
+  ecommerce_sale: 'savdo',
+  cinematic_epic: 'kinematik',
+};
 
 const STYLE_MOOD_MAP = {
   cyberpunk_neon: 'energetic',
@@ -70,8 +86,9 @@ const STEPS = [
   { num: '01', label: 'Dizayn Stili', icon: '🎨' },
   { num: '02', label: "Reklama G'oyasi", icon: '✍️' },
   { num: '03', label: 'Video Davomiyligi', icon: '⏱' },
-  { num: '04', label: 'Video Formati', icon: '📐' },
-  { num: '05', label: 'Rasm & Logo', icon: '🖼️' },
+  { num: '04', label: 'Musiqa Uslubi', icon: '🎵' },
+  { num: '05', label: 'Video Formati', icon: '📐' },
+  { num: '06', label: 'Rasm & Logo', icon: '🖼️' },
 ];
 
 export default function StudioPage({ theme, onThemeToggle }) {
@@ -86,6 +103,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [duration, setDuration] = useState('s30');
+  const [musicStyle, setMusicStyle] = useState(() => STYLE_MUSIC_MAP['cyberpunk_neon']);
   const [aspectRatio, setAspectRatio] = useState('9:16');
   const [errors, setErrors] = useState({});
   const [dragOver, setDragOver] = useState(false);
@@ -119,7 +137,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
   const validateStep = (step) => {
     const errs = {};
     if (step === 1 && !idea.trim()) errs.idea = "Iltimos, reklama g'oyasini kiriting";
-    if (step === 4 && images.length === 0) errs.image = 'Iltimos, kamida bitta rasm yuklang';
+    if (step === 5 && images.length === 0) errs.image = 'Iltimos, kamida bitta rasm yuklang';
     return errs;
   };
 
@@ -136,7 +154,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
   };
 
   const handleSubmit = async () => {
-    const errs = validateStep(4);
+    const errs = validateStep(5);
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setSubmitting(true);
@@ -147,6 +165,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
       formData.append('mood', autoMood);
       formData.append('duration', duration);
       formData.append('style', style);
+      formData.append('musicStyle', musicStyle);
       formData.append('aspectRatio', aspectRatio);
       images.forEach((file) => formData.append('images', file));
 
@@ -165,6 +184,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
             duration,
             aspectRatio,
             style,
+            musicStyle,
             imagePreview: imagePreviews[0],
             jobId: data.jobId,
           },
@@ -379,12 +399,36 @@ export default function StudioPage({ theme, onThemeToggle }) {
             </div>
           )}
 
-          {/* STEP 3 — VIDEO FORMATI */}
+          {/* STEP 3 — MUSIQA USLUBI */}
           {currentStep === 3 && (
-            <div className="studio-panel studio-panel-centered">
+            <div className="studio-panel studio-panel-full">
               <div className="studio-panel-header">
                 <div className="studio-panel-header-left">
                   <span className="studio-panel-num">04</span>
+                  <div className="studio-panel-title-wrap">
+                    <h2 className="studio-panel-title">Musiqa Uslubini Tanlang</h2>
+                    <p className="studio-panel-sub">10 xil uslubdan birini tanlang — energetik bassdan tortib, sokin va jiddiygacha</p>
+                  </div>
+                </div>
+                <div className="studio-panel-header-nav">
+                  <button className="studio-btn-prev" onClick={goPrev} disabled={submitting}>
+                    ← Orqaga
+                  </button>
+                  <button className="studio-btn-next" onClick={goNext}>
+                    Keyingisi →
+                  </button>
+                </div>
+              </div>
+              <MusicStyleSelector selected={musicStyle} onSelect={setMusicStyle} />
+            </div>
+          )}
+
+          {/* STEP 4 — VIDEO FORMATI */}
+          {currentStep === 4 && (
+            <div className="studio-panel studio-panel-centered">
+              <div className="studio-panel-header">
+                <div className="studio-panel-header-left">
+                  <span className="studio-panel-num">05</span>
                   <div className="studio-panel-title-wrap">
                     <h2 className="studio-panel-title">Video Formati</h2>
                     <p className="studio-panel-sub">Qaysi platformaga mos o'lchamni tanlang</p>
@@ -428,12 +472,12 @@ export default function StudioPage({ theme, onThemeToggle }) {
             </div>
           )}
 
-          {/* STEP 4 — RASMLAR */}
-          {currentStep === 4 && (
+          {/* STEP 5 — RASMLAR */}
+          {currentStep === 5 && (
             <div className="studio-panel studio-panel-centered">
               <div className="studio-panel-header">
                 <div className="studio-panel-header-left">
-                  <span className="studio-panel-num">05</span>
+                  <span className="studio-panel-num">06</span>
                   <div className="studio-panel-title-wrap">
                     <h2 className="studio-panel-title">Mahsulot Rasmlari yoki Logo</h2>
                     <p className="studio-panel-sub">
@@ -519,6 +563,10 @@ export default function StudioPage({ theme, onThemeToggle }) {
                   <div className="studio-summary-item">
                     <span className="studio-summary-lbl">Davomiylik</span>
                     <span className="studio-summary-val">{duration === 's30' ? '30 soniya' : '60 soniya'}</span>
+                  </div>
+                  <div className="studio-summary-item">
+                    <span className="studio-summary-lbl">Musiqa</span>
+                    <span className="studio-summary-val">{musicStyle}</span>
                   </div>
                   <div className="studio-summary-item">
                     <span className="studio-summary-lbl">Format</span>
