@@ -59,6 +59,8 @@ cd frontend
 npm install
 npm run build
 cd ..
+chmod 755 "$HOME" 2>/dev/null || true
+chmod -R 755 frontend/dist 2>/dev/null || true
 
 # 4. Restart Application (systemd or PM2)
 echo "[4/5] Starting/restarting application..."
@@ -83,6 +85,7 @@ sudo rm -f /etc/nginx/sites-enabled/default
 
 # Test and reload Nginx
 if sudo nginx -t >/dev/null 2>&1; then
+
   sudo systemctl reload nginx || sudo service nginx reload || sudo systemctl restart nginx
   echo "Nginx sozlandi va qayta ishga tushirildi!"
 else
