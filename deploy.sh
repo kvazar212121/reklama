@@ -73,8 +73,9 @@ fi
 
 # 5. Setup Nginx Configuration
 echo "[5/5] Nginx sozlanmoqda..."
+CURRENT_DIR="$(pwd)"
 sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
-sudo cp reklam.hubservis.uz.conf /etc/nginx/sites-available/reklam.hubservis.uz
+sed "s|/home/[^/]*/reklama|${CURRENT_DIR}|g" reklam.hubservis.uz.conf | sudo tee /etc/nginx/sites-available/reklam.hubservis.uz >/dev/null
 sudo ln -sf /etc/nginx/sites-available/reklam.hubservis.uz /etc/nginx/sites-enabled/reklam.hubservis.uz
 
 # Remove default site if exists
