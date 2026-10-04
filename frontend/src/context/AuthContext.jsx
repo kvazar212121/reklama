@@ -5,6 +5,8 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Lemon Squeezy to'lovidan qaytganda ko'rsatiladigan xabar
+  const [paymentNotice, setPaymentNotice] = useState(null);
 
   const fetchCurrentUser = async () => {
     try {
@@ -30,9 +32,25 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     // URL parametrlarini tekshirish (masalan: ?login=success)
     const params = new URLSearchParams(window.location.search);
+    let shouldCleanUrl = false;
+
     if (params.get('login') === 'success') {
+      shouldCleanUrl = true;
+    }
+
+    // Lemon Squeezy to'lovidan qaytish: /?payment=success&plan=pro
+    // Kredit webhook orqali beriladi, shuning uchun bir necha marta qayta tekshiramiz
+    if (params.get('payment') === 'success') {
+      setPaymentNotice({ status: 'success', plan: params.get('plan') || '' });
+      shouldCleanUrl = true;
+      setTimeout(() => fetchCurrentUser(), 3000);
+      setTimeout(() => fetchCurrentUser(), 8000);
+    }
+
+    if (shouldCleanUrl) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+
     fetchCurrentUser();
   }, []);
 
@@ -53,8 +71,18 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const clearPaymentNotice = () => setPaymentNotice(null);
+
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, refreshUser: fetchCurrentUser }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      loginWithGoogle,
+      logout,
+      refreshUser: fetchCurrentUser,
+      paymentNotice,
+      clearPaymentNotice,
+    }}>
       {children}
     </AuthContext.Provider>
   );

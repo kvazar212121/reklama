@@ -5,7 +5,7 @@ import './PricingSection.css';
 
 export default function PricingSection() {
   const { t } = useTranslation();
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, loginWithGoogle } = useAuth();
   const [plans, setPlans] = useState([]);
   const [freeTier, setFreeTier] = useState({ enabled: true, credits: 2 });
   const [loading, setLoading] = useState(false);
@@ -24,6 +24,13 @@ export default function PricingSection() {
   }, []);
 
   const handleCheckout = async (plan) => {
+    if (!user) {
+      if (confirm("To'lov qilish va videolarni hisobingizga biriktirish uchun avval Google orqali kiring.\n\nHozir kirasizmi?")) {
+        loginWithGoogle ? loginWithGoogle() : (window.location.href = '/auth/google');
+      }
+      return;
+    }
+
     setLoading(true);
     setCheckoutStatus(null);
     try {
@@ -46,6 +53,10 @@ export default function PricingSection() {
             transactionId: data.transactionId,
             message: data.message,
           });
+        }
+      } else if (data.requireLogin) {
+        if (confirm(`${data.error || 'To\'lov qilish uchun tizimga kiring'}\n\nHozir kirasizmi?`)) {
+          loginWithGoogle ? loginWithGoogle() : (window.location.href = '/auth/google');
         }
       } else {
         alert(data.error || 'To\'lov tizimida xatolik');
@@ -94,7 +105,7 @@ export default function PricingSection() {
           </p>
           {freeTier.enabled && (
             <div style={{ marginTop: '16px', display: 'inline-block', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '8px 18px', borderRadius: '9999px', fontSize: '13px', fontWeight: '600' }}>
-              🎁 Yangi foydalanuvchilar uchun dastlabki {freeTier.credits} ta video mutlaqo bepul!
+              🎁 Yangi foydalanuvchilar uchun 1 ta video (30 soniyali animatsiya) mutlaqo bepul!
             </div>
           )}
         </div>

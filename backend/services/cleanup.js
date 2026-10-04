@@ -1,7 +1,7 @@
 /**
  * AdForge AI — Avtomatik Fayl Tozalash Xizmati (Video TTL Cleanup)
  * 
- * Server diskini to'lib qolishdan asrash uchun belgilangan vaqt (standart: 24 soat)
+ * Server diskini to'lib qolishdan asrash uchun belgilangan vaqt (standart: 15 kun)
  * o'tgandan so'ng eski MP4 videolarni va yuklangan rasmlarni avtomatik o'chiradi.
  */
 
@@ -17,8 +17,8 @@ const UPLOAD_DIR = path.resolve(__dirname, '../uploads');
  */
 const cleanupOldFiles = () => {
   try {
-    // TTL soatlarda (standart: 24 soat)
-    const ttlHours = parseInt(db.getSetting('video_ttl_hours', '24'), 10);
+    // TTL soatlarda (standart: 15 kun = 360 soat)
+    const ttlHours = parseInt(db.getSetting('video_ttl_hours', '360'), 10);
     const maxAgeMs = ttlHours * 60 * 60 * 1000;
     const now = Date.now();
 
@@ -38,7 +38,7 @@ const cleanupOldFiles = () => {
             cleanedVideos++;
             // Bazadagi holatni expired qilish
             const jobId = path.basename(file, '.mp4');
-            db.prepare("UPDATE jobs SET status = 'expired', error = 'Video saqlash muddati (24 soat) tugadi' WHERE id = ?").run(jobId);
+            db.prepare("UPDATE jobs SET status = 'expired', error = 'Video saqlash muddati (15 kun) tugadi' WHERE id = ?").run(jobId);
           }
         } catch (_) {}
       }

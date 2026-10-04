@@ -41,6 +41,7 @@ export default function Navbar({ theme, onThemeToggle }) {
           <li><button className="nav-link-btn" onClick={() => scrollToSection('how-it-works')}>{t('nav.howItWorks')}</button></li>
           <li><button className="nav-link-btn" onClick={() => scrollToSection('pricing')}>Tariflar</button></li>
           <li><button className="nav-link-btn nav-link-studio" onClick={() => navigate('/studio')}>🎬 Video Yaratish</button></li>
+          {user && <li><button className="nav-link-btn" onClick={() => navigate('/cabinet')}>👤 Kabinet</button></li>}
         </ul>
 
         {/* Actions */}
@@ -48,7 +49,7 @@ export default function Navbar({ theme, onThemeToggle }) {
           {/* User Credits Badge */}
           {user && (
             <div
-              onClick={() => scrollToSection('pricing')}
+              onClick={() => navigate('/cabinet')}
               style={{
                 background: 'rgba(242, 200, 75, 0.15)',
                 color: 'var(--gold)',
@@ -62,7 +63,7 @@ export default function Navbar({ theme, onThemeToggle }) {
                 alignItems: 'center',
                 gap: '6px',
               }}
-              title="Kreditlarni to'ldirish uchun bosing"
+              title="Shaxsiy kabinetga o'tish"
             >
               <span>⚡</span>
               <span>{user.role === 'admin' ? 'Cheksiz' : `${user.credits} ta video`}</span>
@@ -96,14 +97,20 @@ export default function Navbar({ theme, onThemeToggle }) {
             <div style={{ width: '80px', height: '36px', opacity: 0.5 }}></div>
           ) : user ? (
             <div className="user-profile">
-              {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="user-avatar" />
-              ) : (
-                <div className="user-avatar">
-                  {user.name ? user.name[0].toUpperCase() : 'U'}
-                </div>
-              )}
-              <span className="user-name" title={user.email}>{user.name}</span>
+              <div
+                onClick={() => navigate('/cabinet')}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                title="Shaxsiy kabinet"
+              >
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="user-avatar" />
+                ) : (
+                  <div className="user-avatar">
+                    {user.name ? user.name[0].toUpperCase() : 'U'}
+                  </div>
+                )}
+                <span className="user-name" title={user.email}>{user.name}</span>
+              </div>
               <button className="btn-logout" onClick={logout} title={t('nav.logout')}>
                 {t('nav.logout')}
               </button>

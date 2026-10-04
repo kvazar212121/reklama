@@ -157,6 +157,27 @@ export default function StudioPage({ theme, onThemeToggle }) {
     const errs = validateStep(5);
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
+    if (!user) {
+      if (confirm("Video yaratish va saqlash uchun avval Google orqali kiring.\n\nHozir kirasizmi?")) {
+        window.location.href = '/auth/google';
+      }
+      return;
+    }
+
+    const needed = duration === 's60' ? 2 : 1;
+    if (user.role !== 'admin' && user.credits < needed) {
+      if (duration === 's60' && user.credits === 1) {
+        setErrors({
+          submit: "60 soniyali video yaratish uchun 2 ta kredit talab qilinadi. Sizda 1 ta kredit bor (30 soniyali video uchun). Iltimos, 30 soniyani tanlang yoki 'Tariflar' bo'limidan paket xarid qiling.",
+        });
+      } else {
+        setErrors({
+          submit: "Video yaratish uchun hisobingizda kredit yo'q. 'Tariflar' bo'limidan video paketini tanlashingiz mumkin.",
+        });
+      }
+      return;
+    }
+
     setSubmitting(true);
     try {
       const autoMood = STYLE_MOOD_MAP[style] || 'energetic';
@@ -369,16 +390,16 @@ export default function StudioPage({ theme, onThemeToggle }) {
                     key: 's30',
                     label: '30 soniya',
                     icon: '⚡',
-                    desc: 'TikTok, Instagram Reels, storieslar uchun ideal. Tez va dinamik.',
-                    badge: 'Ko\'proq tanlangan',
+                    desc: 'TikTok, Instagram Reels, storieslar uchun. (1 ta kredit — Bepul sinov uchun)',
+                    badge: 'Bepul sinov (1 kredit)',
                     featured: true,
                   },
                   {
                     key: 's60',
                     label: '60 soniya',
                     icon: '🎬',
-                    desc: 'YouTube, Facebook va TV uchun. Mahsulotni to\'liq tushuntirish imkoni.',
-                    badge: null,
+                    desc: 'YouTube, Facebook va TV uchun. (2 ta kredit talab qilinadi)',
+                    badge: '2 ta kredit',
                     featured: false,
                   },
                 ].map((d) => (
@@ -579,7 +600,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
                   <div className="studio-summary-item">
                     <span className="studio-summary-lbl">Balans</span>
                     <span className="studio-summary-val" style={{ color: '#22c55e' }}>
-                      {user?.role === 'admin' ? 'Cheksiz' : user ? `${user.credits} ta video` : '2 ta bepul'}
+                      {user?.role === 'admin' ? 'Cheksiz' : user ? `${user.credits} ta video` : '1 ta bepul video'}
                     </span>
                   </div>
                 </div>

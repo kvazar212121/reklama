@@ -177,7 +177,12 @@ def _cache(key, fn):
     return CACHE[key]
 
 
-def pluck(n, length, bright=3200, harm=7):
+def pluck(n, length, bright=2000, harm=4):
+    # Standart (lead uchun) parametrlar yumshatilgan: kamroq garmonika va
+    # pastroq yorqinlik — bilan kalimba/arfa-simon "tiri-tiri" shiringlashi
+    # yo'qoladi, lekin zarbdor (staccato) hujum xarakteri saqlanadi.
+    # chord_voice "pluck" turi o'zining aniq bright/harm qiymatini beradi,
+    # shuning uchun bu yumshatish faqat LEAD ovoziga ta'sir qiladi.
     key = ("pluck", n, round(length, 3), bright, harm)
     def build():
         t = T(length)
@@ -186,7 +191,7 @@ def pluck(n, length, bright=3200, harm=7):
         for k in range(1, harm + 1):
             if f * k > SR / 2.4:
                 break
-            s += sine(f * k, t) * np.exp(-t * (3.0 + 0.9 * k)) / k
+            s += sine(f * k, t) * np.exp(-t * (4.0 + 0.7 * k)) / (k * 1.3)
         return lp(s, bright) * 0.6
     return _cache(key, build)
 
@@ -250,6 +255,48 @@ def surnay(n, length):
     return _cache(key, build)
 
 
+def epiano(n, length):
+    # Iliq elektr-pianino: TOZA additiv sintez (chastota/faza modulyatsiyasiz —
+    # FM emas), shuning uchun bell/glass'dagi "ting" jarangi mutlaqo yo'q.
+    # Faqat asosiy ton + tez so'nuvchi 2- va 3-garmonika, yumshoq filtr bilan.
+    key = ("epiano", n, round(length, 3))
+    def build():
+        t = T(length)
+        f = midi(n)
+        s = sine(f, t) * np.exp(-t * 2.0)
+        s += 0.22 * sine(f * 2, t) * np.exp(-t * 5.5)
+        s += 0.08 * sine(f * 3, t) * np.exp(-t * 9.0)
+        return lp(s, 1900) * env(len(t), a=0.015, d=0.3, s=0.6, r=0.14) * 0.6
+    return _cache(key, build)
+
+
+def flute(n, length):
+    # Nafas-asosli uzun ohang — minimalistik/sokin uslublar uchun, plucky emas.
+    key = ("flute", n, round(length, 3))
+    def build():
+        t = T(length)
+        f = midi(n)
+        vib = 0.004 * np.clip((t - 0.15) / 0.3, 0, 1) * np.sin(2 * np.pi * 5.2 * t)
+        breath = hp(noise(len(t), np.random.default_rng(7)), 2000) * 0.05
+        s = sine(f * (1 + vib), t) + 0.12 * sine(f * 2 * (1 + vib), t)
+        return lp(s + breath, 3400) * env(len(t), a=0.05, d=0.18, s=0.8, r=0.14) * 0.5
+    return _cache(key, build)
+
+
+def marimba(n, length):
+    # Yog'ochsimon zarbdor ohang — bell/glass'ning metall-FM tovushidan farqli,
+    # o'yinchoqsimon lekin "tring" emas.
+    key = ("marimba", n, round(length, 3))
+    def build():
+        t = T(length)
+        f = midi(n)
+        s = sine(f, t) * np.exp(-t * 7.5)
+        s += 0.5 * sine(f * 3.9, t) * np.exp(-t * 16)
+        s += 0.25 * sine(f * 6.1, t) * np.exp(-t * 22)
+        return lp(s, 3800) * 0.55
+    return _cache(key, build)
+
+
 LEADS = {
     "pluck": lambda n, l: pluck(n, l),
     "bell": lambda n, l: bell(n, l),
@@ -257,6 +304,9 @@ LEADS = {
     "square": lambda n, l: square_lead(n, l),
     "saw": lambda n, l: saw_lead(n, l),
     "surnay": lambda n, l: surnay(n, l),
+    "epiano": lambda n, l: epiano(n, l),
+    "flute": lambda n, l: flute(n, l),
+    "marimba": lambda n, l: marimba(n, l),
 }
 
 
@@ -398,8 +448,11 @@ HOOKS = {
                88, None, 86, None, 84, None, 81, None, 79, None, 81, None, 84, None, None, None],
     "pulse":  [69, None, 69, None, 72, None, 76, None, 74, None, 72, None, 69, None, None, None,
                71, None, 71, None, 74, None, 79, None, 76, None, 74, None, 71, None, None, None],
-    "drive":  [69, 72, 76, 72, 69, 72, 71, 69, 67, 71, 74, 71, 67, 71, 69, 67,
-               65, 69, 72, 69, 65, 69, 67, 65, 64, 67, 71, 67, 69, None, None, None],
+    # Avval deyarli uzluksiz 16-chi notalar edi (128 BPM'da "turu-turu-turuuuu"
+    # trill effekti beradi) — endi notalar orasiga aniq bo'shliqlar qo'shildi,
+    # xuddi o'sha ohang konturi, lekin alohida eshitiladigan ritmik ibora.
+    "drive":  [69, None, 72, None, 76, None, 72, None, 69, None, 71, None, 67, None, 71, None,
+               65, None, 69, None, 72, None, 65, None, 67, None, 71, None, 69, None, None, None],
     "sale":   [72, 72, 76, 76, 79, 76, 72, None, 74, 74, 77, 77, 81, 77, 74, None,
                76, 76, 79, 79, 83, 79, 76, None, 74, 72, 71, 69, 72, None, None, None],
     "calm":   [69, None, None, None, 72, None, None, None, 74, None, None, None, 71, None, None, None,
@@ -422,7 +475,7 @@ PRESETS = {
     "kiberpank": dict(
         label="Kiberpank & Neon", desc="Qorong'i, tez, detune qilingan sintezatorlar, hard baraban",
         bpm=128, seed=11, prog="cool", hook="drive", hook_oct=12,
-        lead=dict(timbre="square", level=0.34, bar_every=4),
+        lead=dict(timbre="square", level=0.0, bar_every=4),
         chords=dict(kind="stab", level=0.40, steps=[0, 3, 6, 8, 11, 14], dur=0.4),
         bass=dict(kind="reese", level=0.55, steps=[0, 2, 4, 6, 8, 10, 12, 14]),
         drums=dict(kick=[0, 4, 8, 12], clap=[4, 12], hat_open=[2, 6, 10, 14], hat=[1, 3, 5, 7, 9, 11, 13, 15],
@@ -435,7 +488,7 @@ PRESETS = {
     "oltin": dict(
         label="Hashamatli Oltin", desc="Sekin, torli akkordlar, yumshoq bas, nafis pluck",
         bpm=96, seed=22, prog="warm", hook="glass", hook_oct=0,
-        lead=dict(timbre="glass", level=0.30, bar_every=4),
+        lead=dict(timbre="epiano", level=0.0, bar_every=4),
         chords=dict(kind="strings", level=0.42, steps=[0, 8], dur=1.9),
         bass=dict(kind="sub", level=0.48, steps=[0, 8]),
         drums=dict(kick=[0, 10], clap=[8], hat_open=[], hat=[0, 4, 8, 12], snare=[], doira=[3, 11], shaker=[6, 14], timpani=[]),
@@ -447,7 +500,7 @@ PRESETS = {
     "minimal": dict(
         label="Zamonaviy Minimalizm", desc="Toza, siyrak, yumshoq baraban, jim akkordlar",
         bpm=112, seed=33, prog="warm", hook="calm", hook_oct=0,
-        lead=dict(timbre="pluck", level=0.26, bar_every=4),
+        lead=dict(timbre="flute", level=0.0, bar_every=4),
         chords=dict(kind="muted", level=0.34, steps=[0, 6, 10], dur=0.3),
         bass=dict(kind="pluck", level=0.42, steps=[0, 6, 10]),
         drums=dict(kick=[0, 8], clap=[12], hat_open=[], hat=[2, 4, 6, 10, 12, 14], snare=[], doira=[], shaker=[], timpani=[]),
@@ -459,7 +512,7 @@ PRESETS = {
     "kinetik": dict(
         label="Kinetik Tipografika", desc="Stakkato ritm, matn harflariga mos aniq zarbalar",
         bpm=124, seed=44, prog="dark", hook="pulse", hook_oct=12,
-        lead=dict(timbre="pluck", level=0.30, bar_every=4),
+        lead=dict(timbre="pluck", level=0.0, bar_every=4),
         chords=dict(kind="stab", level=0.46, steps=[0, 2, 4, 6, 8, 10, 12, 14], dur=0.22),
         bass=dict(kind="sub", level=0.5, steps=[0, 4, 8, 12]),
         drums=dict(kick=[0, 4, 8, 12], clap=[4, 12], hat_open=[], hat=[0, 2, 4, 6, 8, 10, 12, 14],
@@ -472,7 +525,7 @@ PRESETS = {
     "reels": dict(
         label="Reels & TikTok Trend", desc="Quvnoq, doira+clap, yorqin pluck, tez o'tishlar",
         bpm=122, seed=55, prog="uplift", hook="pop", hook_oct=0,
-        lead=dict(timbre="pluck", level=0.34, bar_every=4),
+        lead=dict(timbre="pluck", level=0.0, bar_every=4),
         chords=dict(kind="stab", level=0.4, steps=[0, 3, 8, 11], dur=0.5),
         bass=dict(kind="sub", level=0.5, steps=[0, 2, 4, 6, 8, 10, 12, 14]),
         drums=dict(kick=[0, 4, 8, 12], clap=[2, 6, 10, 14], hat_open=[6, 14], hat=[0, 2, 4, 8, 10, 12],
@@ -485,7 +538,9 @@ PRESETS = {
     "biznes": dict(
         label="Biznes & Korporativ", desc="Xotirjam, ishonchli, ortiqcha effektsiz",
         bpm=100, seed=66, prog="bright", hook="calm", hook_oct=0,
-        lead=dict(timbre="bell", level=0.24, bar_every=4),
+        # Ohang (lead) ataylab yo'q — "ortiqcha effektsiz, xotirjam" uslubiga mos:
+        # faqat akkord/bas/baraban, hech qanday "chalib turuvchi" ohang yo'q.
+        lead=dict(timbre="epiano", level=0.0, bar_every=4),
         chords=dict(kind="pad", level=0.36, steps=[0, 8], dur=1.9),
         bass=dict(kind="sub", level=0.46, steps=[0, 4, 8, 12]),
         drums=dict(kick=[0, 8], clap=[4, 12], hat_open=[], hat=[2, 6, 10, 14], snare=[], doira=[], shaker=[4, 12], timpani=[]),
@@ -497,7 +552,7 @@ PRESETS = {
     "izometriya": dict(
         label="3D Izometriya & Grafika", desc="Shishasimon qo'ng'iroqlar, o'yinchoq kayfiyat",
         bpm=110, seed=77, prog="bright", hook="glass", hook_oct=12,
-        lead=dict(timbre="bell", level=0.32, bar_every=2),
+        lead=dict(timbre="marimba", level=0.0, bar_every=2),
         chords=dict(kind="pluck", level=0.3, steps=[0, 6, 8, 14], dur=0.35),
         bass=dict(kind="pluck", level=0.4, steps=[0, 4, 8, 12]),
         drums=dict(kick=[0, 6, 8, 14], clap=[4, 12], hat_open=[2, 10], hat=[0, 4, 6, 8, 12, 14],
@@ -510,7 +565,7 @@ PRESETS = {
     "retro": dict(
         label="Retro & Nostalgiya", desc="80-lar uslubi: kvadrat lead, lenta tebranishi, gated pad",
         bpm=108, seed=88, prog="dark", hook="rise", hook_oct=0,
-        lead=dict(timbre="square", level=0.32, bar_every=4),
+        lead=dict(timbre="square", level=0.0, bar_every=4),
         chords=dict(kind="muted", level=0.38, steps=[0, 3, 6, 8, 11, 14], dur=0.22),
         bass=dict(kind="pluck", level=0.46, steps=[0, 2, 4, 6, 8, 10, 12, 14]),
         drums=dict(kick=[0, 8], clap=[4, 12], hat_open=[6, 14], hat=[0, 2, 4, 6, 8, 10, 12, 14],
@@ -523,7 +578,7 @@ PRESETS = {
     "savdo": dict(
         label="Savdo & Katta Chegirma", desc="Shoshilinch, baland clap, sirena va tez o'tishlar",
         bpm=126, seed=99, prog="uplift", hook="sale", hook_oct=0,
-        lead=dict(timbre="pluck", level=0.36, bar_every=4),
+        lead=dict(timbre="pluck", level=0.0, bar_every=4),
         chords=dict(kind="stab", level=0.46, steps=[0, 2, 4, 6, 8, 10, 12, 14], dur=0.2),
         bass=dict(kind="reese", level=0.5, steps=[0, 2, 4, 6, 8, 10, 12, 14]),
         drums=dict(kick=[0, 4, 8, 12], clap=[2, 6, 10, 14], hat_open=[6, 14], hat=[0, 4, 8, 12],
@@ -536,7 +591,7 @@ PRESETS = {
     "kinematik": dict(
         label="Kinematik & Epik", desc="Sekin, keng, timpani va kuchli yakun",
         bpm=84, seed=111, prog="epic", hook="epic", hook_oct=0,
-        lead=dict(timbre="saw", level=0.3, bar_every=4),
+        lead=dict(timbre="saw", level=0.0, bar_every=4),
         chords=dict(kind="strings", level=0.56, steps=[0], dur=3.9),
         bass=dict(kind="sub", level=0.5, steps=[0, 8]),
         drums=dict(kick=[0], clap=[], hat_open=[], hat=[], snare=[], doira=[], shaker=[], timpani=[0, 8]),
@@ -581,7 +636,7 @@ def random_preset(seed=None):
         label="Random (har safar yangi)", desc="Tasodifiy uslub, akkord, tembr va ritm",
         bpm=bpm, seed=int(rng.integers(0, 10 ** 6)), prog=prog, hook=hook,
         hook_oct=int(rng.choice([0, 0, 12])),
-        lead=dict(timbre=timbre, level=float(rng.uniform(0.22, 0.38)), bar_every=int(rng.choice([2, 4]))),
+        lead=dict(timbre=timbre, level=0.0, bar_every=int(rng.choice([2, 4]))),
         chords=dict(kind=kind, level=float(rng.uniform(0.3, 0.46)), steps=steps,
                     dur=float(rng.uniform(0.2, 1.6))),
         bass=dict(kind=bk, level=float(rng.uniform(0.4, 0.56)),
@@ -621,13 +676,19 @@ def add(bus, sig, start, gain=1.0, pan=0.0):
     bus[1, i:i + len(sig)] += sig * rg
 
 
-def build(preset, dur, bpm=None, transpose=0):
+def build(preset, dur, bpm=None, transpose=0, seed_override=None):
     bpm = bpm or preset["bpm"]
     beat = 60.0 / bpm
     bar = 4 * beat
     step = beat / 4
     n = int(SR * dur)
-    rng = np.random.default_rng(preset["seed"])
+    # seed_override berilmasa ham, preset["seed"]'ni to'g'ridan-to'g'ri ishlatmaymiz —
+    # aks holda har safar BIR XIL audio (bayt-bayti) chiqadi. --seed aniq berilmasa,
+    # har chaqirilishda haqiqiy tasodifiy urug' olinadi: uslub xarakteri (bpm, akkord
+    # progressiyasi, baraban naqshi shabloni, instrumentatsiya) saqlanadi, lekin
+    # shovqin-asosli tovush teksturasi va quyidagi ritmik jonlantirish har safar
+    # boshqacha chiqadi.
+    rng = np.random.default_rng(seed_override)
     drums = np.zeros((2, n))
     music = np.zeros((2, n))
     fx = np.zeros((2, n))
@@ -657,6 +718,7 @@ def build(preset, dur, bpm=None, transpose=0):
         return "outro"
 
     kick_times = []
+    hook_play_idx = 0  # har chaqirilishda ohang variantini almashtirish uchun hisoblagich
     nb = int(np.ceil(dur / bar))
     for bi in range(nb):
         t0 = bi * bar
@@ -683,6 +745,14 @@ def build(preset, dur, bpm=None, transpose=0):
                 add(drums, hat(rng), t0 + s * step, (0.32 if sec != "drop2" else 0.42) * dmul, pan=0.3)
             for s in preset["drums"]["hat_open"]:
                 add(drums, hat(rng, open_=True), t0 + s * step, 0.3 * dmul, pan=0.25)
+            # Ghost hi-hat: har taktda rng orqali tasodifiy qo'shimcha yengil
+            # zarba — xuddi shu uslub har ishga tushirilganda ritmik jihatdan
+            # sal boshqacha "jonli" tuyulishi uchun (bir xil qotgan patern emas).
+            if not soft:
+                existing = set(preset["drums"]["hat"]) | set(preset["drums"]["hat_open"])
+                for s in range(16):
+                    if s not in existing and rng.random() < 0.12:
+                        add(drums, hat(rng), t0 + s * step, 0.16 * dmul, pan=-0.15)
             for s in preset["drums"]["shaker"]:
                 add(drums, shaker(rng), t0 + s * step, 0.5 * dmul, pan=-0.3)
             for s in preset["drums"]["timpani"]:
@@ -718,16 +788,30 @@ def build(preset, dur, bpm=None, transpose=0):
             add(music, chord_voice(ch, bar + 0.4, preset["pad"]["kind"]), t0,
                 preset["pad"]["level"] * (1.15 if soft else 0.8), pan=-0.1)
 
-        # --- ohang (hook), har N taktda
+        # --- ohang (hook), har N taktda — monotonlikni yo'qotish uchun har
+        # chaqirilishda ohang sal boshqacha variantda eshitiladi: asl holicha,
+        # birinchi yarmi oktava ko'tarilgan holda, yoki ikki yarmi almashtirilgan
+        # holda (bir xil notalar, boshqa tartib/registr — garmoniya buzilmaydi,
+        # lekin butun video davomida bitta qotgan rif takrorlanib qolmaydi).
         if bi % max(1, preset["lead"]["bar_every"]) == 0:
             lvl = preset["lead"]["level"]
             if sec == "intro":
                 lvl *= 0.55
             elif sec == "break":
                 lvl *= 0.75
-            play = hook
             if sec == "drop2":
                 lvl *= 1.1
+
+            half = len(hook) // 2
+            variant = hook_play_idx % 3
+            if variant == 0:
+                play = hook
+            elif variant == 1:
+                play = [None if x is None else x + 12 for x in hook[:half]] + hook[half:]
+            else:
+                play = hook[half:] + hook[:half]
+            hook_play_idx += 1
+
             i = 0
             while i < len(play):
                 x = play[i]
@@ -887,20 +971,24 @@ def main():
     jobs = []
     if a.preset == "all":
         for k in PRESETS:
-            jobs.append((k, PRESETS[k], None))
+            jobs.append((k, PRESETS[k], a.seed))
     elif a.preset == "random":
-        jobs.append(("random", random_preset(a.seed), a.seed))
+        rp = random_preset(a.seed)
+        jobs.append(("random", rp, rp["seed"]))
     else:
         k = a.preset.strip().lower()
         if k not in PRESETS:
             print(f"Noma'lum uslub: {k}\nMavjud: {', '.join(PRESETS)}, random")
             sys.exit(2)
-        jobs.append((k, PRESETS[k], None))
+        jobs.append((k, PRESETS[k], a.seed))
 
     os.makedirs(out_root if (not a.out or os.path.isdir(a.out) or a.preset == "all") else os.path.dirname(a.out) or ".", exist_ok=True)
     for name, preset, seed in jobs:
         t0 = time.time()
-        mix = build(preset, a.dur, a.bpm, a.transpose)
+        # --seed berilmasa (odatiy holat): har ishga tushirishda haqiqiy tasodifiy
+        # urug' — xuddi shu uslub har safar sal boshqacha (ritmik jonlantirish,
+        # shovqin teksturasi) chiqadi. --seed berilsa: takrorlanadigan natija.
+        mix = build(preset, a.dur, a.bpm, a.transpose, seed_override=seed)
         if a.preset == "all":
             dst = os.path.join(out_root, f"{name}.wav")
         elif a.out and (a.out.endswith(".wav") or a.out.endswith(".WAV")):

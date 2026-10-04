@@ -62,7 +62,7 @@ export default function ResultPage() {
         <div className="result-expiry-banner">
           <span className="result-expiry-icon">⏳</span>
           <span>
-            Bu video <strong>24 soatdan</strong> so'ng serverdan avtomatik o'chiriladi — <strong>hoziroq yuklab oling!</strong>
+            Bu video <strong>15 kundan</strong> so'ng serverdan avtomatik o'chiriladi — <strong>hoziroq yuklab oling!</strong>
           </span>
         </div>
 

@@ -7,8 +7,6 @@ const clientID = process.env.GOOGLE_CLIENT_ID || 'missing_google_client_id';
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET || 'missing_google_client_secret';
 const callbackURL = process.env.GOOGLE_CALLBACK_URL || 'https://reklam.hubservis.uz/auth/google/callback';
 
-// .env dagi ADMIN_EMAILS (vergul bilan ajratilgan) — shu emaillar Google orqali
-// kirganda avtomatik ravishda 'admin' roliga ega bo'ladi.
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
   .map((e) => e.trim().toLowerCase())
@@ -19,7 +17,8 @@ passport.use(new GoogleStrategy({
   clientSecret,
   callbackURL,
   proxy: true,
-}, async (accessToken, refreshToken, profile, done) => {
+  passReqToCallback: true,
+}, async (req, accessToken, refreshToken, profile, done) => {
   try {
     const googleId = profile.id;
     const email    = profile.emails?.[0]?.value || '';
@@ -32,12 +31,29 @@ passport.use(new GoogleStrategy({
     const isDesignatedAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
 
     if (!user) {
-      // Tekin versiya yoqilgan bo'lsa yangi foydalanuvchiga bepul kreditlar berish
-      const freeTierEnabled = db.getSetting('free_tier_enabled', '1') === '1';
-      const initialCredits = freeTierEnabled ? parseInt(db.getSetting('free_credits_per_user', '2'), 10) : 0;
-      const freeClaimed = freeTierEnabled ? 1 : 0;
+      // IP manzil va qurilma ma'lumotlarini aniqlash
+      const rawIp = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket?.remoteAddress || req.ip || '';
+      const clientIp = rawIp.split(',')[0].trim().replace(/^.*:/, '');
+      const userAgent = req.headers['user-agent'] || '';
+      const deviceFp = req.cookies?.adforge_fp || req.headers['x-device-fingerprint'] || '';
 
-      // ADMIN_EMAILS ro'yxatidagi email bo'lsa yoki birinchi (real) foydalanuvchi bo'lsa, admin qilinadi
+      const freeTierEnabled = db.getSetting('free_tier_enabled', '1') === '1';
+
+      // ── IP & QURILMA HIMOYASI: Bir shaxsga faqat 1 ta bepul video ──
+      let alreadyClaimed = false;
+      if (clientIp && clientIp !== '127.0.0.1' && clientIp !== 'localhost') {
+        const ipClaim = db.prepare('SELECT id FROM free_tier_claims WHERE ip_address = ?').get(clientIp);
+        if (ipClaim) alreadyClaimed = true;
+      }
+      if (!alreadyClaimed && deviceFp) {
+        const fpClaim = db.prepare('SELECT id FROM free_tier_claims WHERE device_fingerprint = ?').get(deviceFp);
+        if (fpClaim) alreadyClaimed = true;
+      }
+
+      // Agar oldin ushbu IP/qurilmadan olinmagan bo'lsa: 1 ta bepul kredit
+      const initialCredits = (freeTierEnabled && !alreadyClaimed) ? 1 : 0;
+      const freeClaimed = 1;
+
       const userCount = db.prepare('SELECT count(*) as c FROM users WHERE id != ?').get('guest_user').c;
       const role = (isDesignatedAdmin || userCount === 0) ? 'admin' : 'user';
       const id = uuidv4();
@@ -47,9 +63,18 @@ passport.use(new GoogleStrategy({
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).run(id, googleId, email, name, avatar, role, initialCredits, freeClaimed);
 
+      // Agar bepul kredit berilgan bo'lsa, qayd qilib qo'yish
+      if (initialCredits > 0) {
+        db.prepare(`
+          INSERT INTO free_tier_claims (id, user_id, ip_address, device_fingerprint, user_agent)
+          VALUES (?, ?, ?, ?, ?)
+        `).run(uuidv4(), id, clientIp, deviceFp, userAgent);
+        req.session.welcomeBonus = true;
+      }
+
       user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     } else {
-      // Update user info — ADMIN_EMAILS ro'yxatidagi bo'lsa, har kirishda admin roli qayta tasdiqlanadi
+      // Update user info
       db.prepare(`
         UPDATE users SET name = ?, avatar = ?, role = CASE WHEN ? THEN 'admin' ELSE role END, updated_at = CURRENT_TIMESTAMP
         WHERE google_id = ?

@@ -95,6 +95,7 @@ const runJob = (job) => {
       job.model || 'deepseek/deepseek-flash',
       job.style || 'cyberpunk_neon',
       job.aspect_ratio || '9:16',
+      job.music_style || '',
     ], {
       cwd: path.resolve(__dirname, '..'),
       env: {

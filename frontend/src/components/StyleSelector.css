@@ -117,6 +117,26 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Musiqa namunasini eshitish tugmasi */
+.music-preview-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.music-preview-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
 /* Selected check indicator */
 .selected-check {
   margin-left: auto;

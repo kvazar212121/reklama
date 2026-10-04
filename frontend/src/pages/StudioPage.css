@@ -457,6 +457,134 @@
   transform: scale(1);
 }
 
+/* ── VIDEO FORMATI (ASPECT RATIO) STEP ── */
+.studio-aspect-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.studio-aspect-card {
+  position: relative;
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.studio-aspect-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.studio-aspect-card.active {
+  border-color: var(--gold);
+  background: var(--ink);
+  color: white;
+  box-shadow: 0 16px 40px rgba(242, 200, 75, 0.2);
+  transform: translateY(-4px);
+}
+
+[data-theme="light"] .studio-aspect-card.active {
+  background: var(--ink);
+}
+
+.studio-aspect-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.studio-aspect-frame-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 110px;
+  width: 100%;
+}
+
+.studio-aspect-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.studio-aspect-frame.active {
+  border-color: var(--gold);
+  background: rgba(242, 200, 75, 0.12);
+}
+
+.studio-aspect-ratio-text {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.studio-aspect-frame.active .studio-aspect-ratio-text {
+  color: var(--gold);
+}
+
+.studio-aspect-label {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.studio-aspect-card.active .studio-aspect-label {
+  color: white;
+}
+
+.studio-aspect-size {
+  display: none;
+}
+
+.studio-aspect-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.studio-aspect-card.active .studio-aspect-desc {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.studio-aspect-platforms {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.studio-aspect-card.active .studio-aspect-platforms {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 640px) {
+  .studio-aspect-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── IMAGE UPLOAD STEP ── */
 .studio-dropzone {
   border: 2px dashed var(--border);

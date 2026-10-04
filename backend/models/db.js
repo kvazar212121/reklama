@@ -89,6 +89,20 @@ db.exec(`
     added_by   TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Bepul 1 ta video krediti olingan IP va qurilmalar ro'yxati (takroriy suiste'mol qilishdan himoya)
+  CREATE TABLE IF NOT EXISTS free_tier_claims (
+    id                 TEXT PRIMARY KEY,
+    user_id            TEXT NOT NULL,
+    ip_address         TEXT NOT NULL,
+    device_fingerprint TEXT,
+    user_agent         TEXT,
+    created_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_claims_ip ON free_tier_claims(ip_address);
+  CREATE INDEX IF NOT EXISTS idx_claims_fp ON free_tier_claims(device_fingerprint);
 `);
 
 // Mavjud users jadvaliga yangi ustunlar qo'shish (agar mavjud bo'lmasa)
@@ -107,19 +121,21 @@ addColumnIfNotExists('jobs', "model TEXT DEFAULT 'deepseek/deepseek-chat'");
 addColumnIfNotExists('jobs', "style TEXT DEFAULT 'cyberpunk_neon'");
 addColumnIfNotExists('jobs', 'image_paths TEXT'); // JSON massiv — bir nechta rasm/logo yo'llari
 addColumnIfNotExists('jobs', "aspect_ratio TEXT DEFAULT '9:16'");
+addColumnIfNotExists('jobs', 'music_style TEXT'); // Mijoz aniq tanlagan musiqa uslubi (10 xil); bo'sh bo'lsa dizayn stiliga avtomatik mos uslub ishlatiladi
 
 // Boshlang'ich tizim sozlamalari (Settings)
 const defaultSettings = [
-  { key: 'deepseek_api_key', value: 'sk-e8d8b5a82ab04b7d95a8c6c0aea4a3a7', description: 'DeepSeek API kaliti' },
+  { key: 'deepseek_api_key', value: '', description: 'DeepSeek API kaliti (bo\'sh bo\'lsa .env dagi DEEPSEEK_API_KEY ishlatiladi)' },
   { key: 'deepseek_model', value: 'deepseek/deepseek-chat', description: 'Standart DeepSeek AI modeli (deepseek-chat, deepseek-coder, deepseek-reasoner)' },
   { key: 'deepseek_base_url', value: 'https://api.deepseek.com', description: 'DeepSeek API bazaviy URL' },
   { key: 'free_tier_enabled', value: '1', description: 'Tekin versiya (bepul sinov) yoqilgan/o\'chirilgan (1 yoki 0)' },
-  { key: 'free_credits_per_user', value: '2', description: 'Har bir yangi foydalanuvchiga beriladigan bepul videolar soni' },
+  { key: 'free_credits_per_user', value: '1', description: 'Har bir yangi foydalanuvchiga beriladigan bepul videolar soni (1 ta 30s video)' },
   { key: 'lemonsqueezy_api_key', value: '', description: 'Lemon Squeezy API kaliti' },
   { key: 'lemonsqueezy_store_id', value: '', description: 'Lemon Squeezy Store ID' },
   { key: 'lemonsqueezy_webhook_secret', value: '', description: 'Lemon Squeezy Webhook imzo kaliti' },
   { key: 'lemonsqueezy_test_mode', value: '1', description: 'Lemon Squeezy Test rejimi (1=test/sandbox, 0=haqiqiy/live)' },
   { key: 'access_restricted', value: '1', description: 'Sinov bosqichi: yoqilgan bo\'lsa faqat allowed_emails ro\'yxatidagi (yoki admin) foydalanuvchilar video yarata oladi' },
+  { key: 'video_ttl_hours', value: '360', description: 'Video va yuklangan rasmlarni serverda necha soat saqlash (standart: 360 soat = 15 kun)' },
 ];
 
 const insertSetting = db.prepare(`

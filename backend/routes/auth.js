@@ -50,7 +50,9 @@ router.get('/google/callback',
     failureRedirect: `${FRONTEND_URL}/?error=auth_failed`,
   }),
   (req, res) => {
-    res.redirect(`${FRONTEND_URL}/?login=success`);
+    const bonus = req.session?.welcomeBonus ? '&welcome_bonus=1' : '';
+    if (req.session) delete req.session.welcomeBonus;
+    res.redirect(`${FRONTEND_URL}/?login=success${bonus}`);
   }
 );
 

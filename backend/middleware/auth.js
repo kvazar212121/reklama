@@ -9,7 +9,7 @@ const requireAuth = (req, res, next) => {
   }
   return res.status(401).json({
     success: false,
-    error: 'Kirish talab etiladi. Iltimos, Google orqali kiring.',
+    requireLogin: true, requireLogin: true, requireLogin: true, requireLogin: true, requireLogin: true, error: 'Kirish talab etiladi. Iltimos, Google orqali kiring.',
   });
 };
 

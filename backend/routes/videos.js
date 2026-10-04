@@ -108,7 +108,7 @@ const MAX_IDEA_LENGTH = 1200;
 
 // ── Video yaratish so'rovi ─────────────────────────────────────────────────
 // POST /api/videos/create
-router.post('/create', optionalAuth, checkAccess, uploadImages, async (req, res) => {
+router.post('/create', requireAuth, checkAccess, uploadImages, async (req, res) => {
   try {
     if (req.files && req.files.length > 0) {
       await Promise.all(req.files.map((f) => resizeImageInPlace(f.path)));
@@ -140,31 +140,29 @@ router.post('/create', optionalAuth, checkAccess, uploadImages, async (req, res)
       return res.status(400).json({ success: false, error: 'Noto\'g\'ri video uzunligi' });
     }
 
-    const userId = req.user ? req.user.id : 'guest_user';
-    let user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
     if (!user) {
-      db.prepare(`
-        INSERT OR IGNORE INTO users (id, google_id, email, name, avatar, role, credits, free_credits_claimed)
-        VALUES ('guest_user', 'guest_000', 'guest@reklam.hubservis.uz', 'Mehmon Foydalanuvchi', '', 'user', 2, 1)
-      `).run();
-      user = db.prepare('SELECT * FROM users WHERE id = ?').get('guest_user');
+      return res.status(401).json({
+        success: false,
+        requireLogin: true,
+        error: 'Foydalanuvchi topilmadi. Iltimos, Google orqali kiring.',
+      });
     }
 
-    // ── KREDIT / TEKIN VERSIYA TEKSHIRUVI ──
-    const freeTierEnabled = db.getSetting('free_tier_enabled', '1') === '1';
-    const freeCreditsPerUser = parseInt(db.getSetting('free_credits_per_user', '2'), 10);
-
-    // Agar foydalanuvchi hali bepul kreditlarini olmagan bo'lsa va tekin rejim yoqilgan bo'lsa
-    if (user.free_credits_claimed === 0 && freeTierEnabled) {
-      db.prepare('UPDATE users SET credits = credits + ?, free_credits_claimed = 1 WHERE id = ?')
-        .run(freeCreditsPerUser, user.id);
-      user.credits += freeCreditsPerUser;
-    }
-
-    // Admin bo'lsa yoki kreditlari bo'lsa ruxsat
+    // ── KREDIT VA DAVOMIYLIK TEKSHIRUVI ──
+    // 30 soniyalik video = 1 kredit
+    // 60 soniyalik video = 2 kredit
+    const creditsNeeded = duration === 's60' ? 2 : 1;
     const isAdmin = user.role === 'admin';
-    if (!isAdmin && user.credits <= 0) {
+
+    if (!isAdmin && user.credits < creditsNeeded) {
+      if (duration === 's60' && user.credits === 1) {
+        return res.status(402).json({
+          success: false,
+          needPayment: true,
+          error: "60 soniyali video yaratish uchun 2 ta kredit talab qilinadi. Sizda 1 ta kredit bor (30 soniya uchun). 30 soniyali videoni tanlang yoki tarif sotib oling.",
+        });
+      }
       return res.status(402).json({
         success: false,
         needPayment: true,
@@ -172,10 +170,10 @@ router.post('/create', optionalAuth, checkAccess, uploadImages, async (req, res)
       });
     }
 
-    // Kreditni 1 taga kamaytirish (Admin bo'lmagan holda)
+    // Kreditni kamaytirish (Admin bo'lmagan holda)
     if (!isAdmin) {
-      db.prepare('UPDATE users SET credits = MAX(0, credits - 1), updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-        .run(user.id);
+      db.prepare('UPDATE users SET credits = MAX(0, credits - ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        .run(creditsNeeded, user.id);
     }
 
     const imagePaths = (req.files || []).map((f) => f.path);
