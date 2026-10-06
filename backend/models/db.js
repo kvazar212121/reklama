@@ -123,6 +123,12 @@ addColumnIfNotExists('jobs', 'image_paths TEXT'); // JSON massiv — bir nechta 
 addColumnIfNotExists('jobs', "aspect_ratio TEXT DEFAULT '9:16'");
 addColumnIfNotExists('jobs', 'music_style TEXT'); // Mijoz aniq tanlagan musiqa uslubi (10 xil); bo'sh bo'lsa dizayn stiliga avtomatik mos uslub ishlatiladi
 
+// ── Talking-Head Overlay (gapli video ustiga animatsiya) uchun ustunlar ──
+addColumnIfNotExists('jobs', "job_type TEXT DEFAULT 'generate'"); // 'generate' | 'overlay'
+addColumnIfNotExists('jobs', 'source_video_path TEXT');           // overlay: mijoz yuklagan gapli video
+addColumnIfNotExists('jobs', "overlay_intensity TEXT DEFAULT 'medium'"); // light | medium | heavy
+addColumnIfNotExists('jobs', 'add_music INTEGER DEFAULT 1');      // overlay: fon musiqa qo'shilsinmi
+
 // Boshlang'ich tizim sozlamalari (Settings)
 const defaultSettings = [
   { key: 'deepseek_api_key', value: '', description: 'DeepSeek API kaliti (bo\'sh bo\'lsa .env dagi DEEPSEEK_API_KEY ishlatiladi)' },

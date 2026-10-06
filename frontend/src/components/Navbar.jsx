@@ -32,7 +32,7 @@ export default function Navbar({ theme, onThemeToggle }) {
         {/* Logo */}
         <div className="navbar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <div className="logo-icon">🎬</div>
-          <span>ADFORGE<b style={{ color: 'var(--gold)' }}>.AI</b></span>
+          <span>airek<b style={{ color: 'var(--gold)' }}>.uz</b></span>
         </div>
 
         {/* Nav Links */}
@@ -41,6 +41,7 @@ export default function Navbar({ theme, onThemeToggle }) {
           <li><button className="nav-link-btn" onClick={() => scrollToSection('how-it-works')}>{t('nav.howItWorks')}</button></li>
           <li><button className="nav-link-btn" onClick={() => scrollToSection('pricing')}>Tariflar</button></li>
           <li><button className="nav-link-btn nav-link-studio" onClick={() => navigate('/studio')}>🎬 Video Yaratish</button></li>
+          <li><button className="nav-link-btn nav-link-overlay" onClick={() => navigate('/overlay')}>🎞️ Video Jonlantirish</button></li>
           {user && <li><button className="nav-link-btn" onClick={() => navigate('/cabinet')}>👤 Kabinet</button></li>}
         </ul>
 
@@ -66,7 +67,7 @@ export default function Navbar({ theme, onThemeToggle }) {
               title="Shaxsiy kabinetga o'tish"
             >
               <span>⚡</span>
-              <span>{user.role === 'admin' ? 'Cheksiz' : `${user.credits} ta video`}</span>
+              <span>{`${user.credits || 0} ta video`}</span>
             </div>
           )}
 

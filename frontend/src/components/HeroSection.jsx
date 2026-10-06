@@ -49,7 +49,7 @@ export default function HeroSection({ onStart }) {
                   <span className="studio-dot yellow" />
                   <span className="studio-dot green" />
                 </div>
-                <span className="studio-title">AdForge AI Studio v2.0</span>
+                <span className="studio-title">airek Studio v2.0</span>
               </div>
 
               <div className="studio-screen">

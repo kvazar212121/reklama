@@ -55,7 +55,7 @@ passport.use(new GoogleStrategy({
       const freeClaimed = 1;
 
       const userCount = db.prepare('SELECT count(*) as c FROM users WHERE id != ?').get('guest_user').c;
-      const role = (isDesignatedAdmin || userCount === 0) ? 'admin' : 'user';
+      const role = isDesignatedAdmin ? 'admin' : 'user';
       const id = uuidv4();
 
       db.prepare(`

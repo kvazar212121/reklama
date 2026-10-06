@@ -13,6 +13,7 @@ import ProgressPage from './pages/ProgressPage';
 import ResultPage from './pages/ResultPage';
 import AdminPage from './pages/AdminPage';
 import StudioPage from './pages/StudioPage';
+import OverlayPage from './pages/OverlayPage';
 import CabinetPage from './pages/CabinetPage';
 
 // Lemon Squeezy to'lovidan qaytganda ko'rsatiladigan xabar.
@@ -133,10 +134,11 @@ function HomePage() {
       <HowItWorks />
       <PricingSection />
       <footer style={{
-        background: 'var(--ink)',
-        color: 'white',
-        borderTop: '1px solid rgba(255, 255, 255, 0.14)',
+        background: 'var(--bg-secondary)',
+        color: 'var(--text-secondary)',
+        borderTop: '1px solid var(--border)',
         padding: '50px 0 36px',
+        transition: 'all 0.25s ease',
       }}>
         <div className="container" style={{
           display: 'flex',
@@ -152,15 +154,16 @@ function HomePage() {
               fontWeight: '900',
               marginBottom: '6px',
               letterSpacing: '-0.05em',
+              color: 'var(--text-primary)',
             }}>
-              ADFORGE<span style={{ color: 'var(--gold)' }}>.AI</span>
+              airek<span style={{ color: 'var(--gold)' }}>.uz</span>
             </div>
-            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px', margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
               Professional AI Reklama Video Platformasi
             </p>
           </div>
-          <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '13px', margin: 0 }}>
-            © {new Date().getFullYear()} AdForge AI. Barcha huquqlar himoyalangan.
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
+            © {new Date().getFullYear()} airek.uz. Barcha huquqlar himoyalangan.
           </p>
         </div>
       </footer>
@@ -184,6 +187,7 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -206,6 +210,7 @@ export default function App() {
             </AppLayout>
           } />
           <Route path="/studio" element={<StudioPage theme={theme} onThemeToggle={toggleTheme} />} />
+          <Route path="/overlay" element={<OverlayPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/cabinet" element={<CabinetPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/:jobId" element={<ProgressPage />} />

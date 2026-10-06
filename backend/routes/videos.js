@@ -106,6 +106,87 @@ const uploadImages = (req, res, next) => {
 
 const MAX_IDEA_LENGTH = 1200;
 
+// ── Multer: gapli VIDEO yuklash (Talking-Head overlay uchun, alohida) ─────
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.mp4';
+    cb(null, `src_${uuidv4()}${ext}`);
+  },
+});
+const videoFilter = (req, file, cb) => {
+  const allowed = ['video/mp4', 'video/quicktime', 'video/x-matroska', 'video/webm', 'video/x-msvideo'];
+  if (allowed.includes(file.mimetype)) cb(null, true);
+  else cb(new Error('Faqat video fayllar qabul qilinadi (MP4, MOV, WEBM, MKV)'), false);
+};
+const uploadVideo = multer({
+  storage: videoStorage,
+  fileFilter: videoFilter,
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200 MB gapli video uchun
+}).single('video');
+
+const uploadSourceVideo = (req, res, next) => {
+  uploadVideo(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ success: false, error: 'Video hajmi 200 MB dan oshmasligi kerak' });
+    }
+    return res.status(400).json({ success: false, error: err.message || 'Video yuklashda xatolik' });
+  });
+};
+
+// ── TALKING-HEAD OVERLAY: gapli video ustiga animatsiya (ALOHIDA pipeline) ──
+// POST /api/videos/overlay
+router.post('/overlay', requireAuth, checkAccess, uploadSourceVideo, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Iltimos, gapirib turgan videongizni yuklang' });
+    }
+
+    const intensity = ['light', 'medium', 'heavy'].includes(req.body.intensity) ? req.body.intensity : 'medium';
+    const addMusic = (req.body.addMusic === '0' || req.body.addMusic === 'false') ? 0 : 1;
+    const musicStyle = (req.body.musicStyle && VALID_MUSIC_STYLE_IDS.includes(req.body.musicStyle)) ? req.body.musicStyle : null;
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    if (!user) {
+      return res.status(401).json({ success: false, requireLogin: true, error: 'Foydalanuvchi topilmadi. Iltimos, Google orqali kiring.' });
+    }
+
+    // Overlay ham 1 ta kredit sarflaydi (admin cheksiz)
+    const isAdmin = user.role === 'admin';
+    if (!isAdmin && user.credits < 1) {
+      // Yuklangan videoni tozalab, to'lov so'raymiz
+      try { fs.unlinkSync(req.file.path); } catch (_) {}
+      return res.status(402).json({
+        success: false, needPayment: true,
+        error: 'Video ustiga animatsiya qo\'shish uchun hisobingizda kredit yo\'q. Tariflardan birini tanlang.',
+      });
+    }
+    if (!isAdmin) {
+      db.prepare('UPDATE users SET credits = MAX(0, credits - 1), updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
+    }
+
+    const jobId = uuidv4();
+    db.prepare(`
+      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, overlay_intensity, add_music, music_style)
+      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'overlay', ?, ?, ?, ?)
+    `).run(jobId, user.id, 'Talking-head video overlay', req.file.path, intensity, addMusic, musicStyle);
+
+    setTimeout(processNextJob, 100);
+    console.log(`[API] New OVERLAY job: ${jobId} by ${user.id} | intensity=${intensity} music=${addMusic}`);
+
+    res.status(201).json({
+      success: true, jobId,
+      remainingCredits: isAdmin ? 'unlimited' : user.credits - 1,
+      message: 'Video ustiga animatsiya qo\'shish navbatga qo\'shildi',
+    });
+  } catch (err) {
+    console.error('[API] Overlay error:', err);
+    res.status(500).json({ success: false, error: 'Server xatosi: ' + err.message });
+  }
+});
+
+
 // ── Video yaratish so'rovi ─────────────────────────────────────────────────
 // POST /api/videos/create
 router.post('/create', requireAuth, checkAccess, uploadImages, async (req, res) => {

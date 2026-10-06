@@ -251,7 +251,7 @@ export default function AdminPage() {
       {/* Header */}
       <div className="admin-header">
         <div>
-          <h1>⚙️ AdForge AI Admin Panel</h1>
+          <h1>⚙️ airek.uz Admin Panel</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
             Tariflar, tekin versiya va to'lov tizimlarini boshqarish markazi
           </p>

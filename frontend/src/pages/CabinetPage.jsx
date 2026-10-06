@@ -259,7 +259,7 @@ export default function CabinetPage({ theme, onThemeToggle }) {
       <header className="cabinet-topbar">
         <div className="cabinet-logo" onClick={() => navigate('/')}>
           <div className="logo-icon">🎬</div>
-          <span>ADFORGE<b>.AI</b></span>
+          <span>airek<b style={{ color: 'var(--gold)' }}>.uz</b></span>
         </div>
         <div className="cabinet-topbar-actions">
           <div className="lang-selector">

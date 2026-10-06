@@ -62,6 +62,54 @@ const runJob = (job) => {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
     const outputFile = path.join(outputDir, `${job.id}.mp4`);
+
+    // ── Job turiga qarab tegishli worker tanlanadi ──
+    // 'overlay' — mijoz yuklagan gapli video ustiga animatsiya qo'shish (alohida pipeline)
+    // 'generate' (default) — g'oyadan noldan video yaratish (asosiy pipeline)
+    if (job.job_type === 'overlay') {
+      const overlayScript = path.resolve(__dirname, './jcode_overlay_worker.js');
+      const proc = spawn('node', [
+        overlayScript,
+        job.id,
+        job.source_video_path || '',
+        outputFile,
+        job.overlay_intensity || 'medium',
+        job.music_style || '',
+        String(job.add_music == null ? 1 : job.add_music),
+      ], {
+        cwd: path.resolve(__dirname, '..'),
+        env: { ...process.env, PATH: `${process.env.PATH}:/home/devops/.local/bin` },
+        detached: false,
+      });
+
+      let lastErrLine = '';
+      proc.stdout.on('data', (d) => console.log(`[Overlay ${job.id}]`, d.toString().trim()));
+      proc.stderr.on('data', (d) => {
+        const text = d.toString().trim();
+        console.error(`[Overlay ${job.id}] ERR:`, text);
+        const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+        if (lines.length) lastErrLine = lines[lines.length - 1];
+      });
+
+      const overlayTimeout = parseInt(process.env.JOB_TIMEOUT_MS || '3900000', 10);
+      const gt = setTimeout(() => {
+        proc.kill('SIGTERM');
+        reject(new Error(`Job timeout (${Math.round(overlayTimeout / 60000)} daqiqa)`));
+      }, overlayTimeout);
+
+      proc.on('close', (code) => {
+        clearTimeout(gt);
+        if (code === 0 && fs.existsSync(outputFile)) {
+          resolve(outputFile);
+        } else {
+          const m = lastErrLine.match(/Xatolik:\s*(.+)$/);
+          reject(new Error((m ? m[1] : lastErrLine) || `overlay worker exit ${code}`));
+        }
+      });
+      proc.on('error', (err) => { clearTimeout(gt); reject(new Error(`Overlay worker spawn error: ${err.message}`)); });
+      return; // overlay yo'li shu yerda tugaydi — pastdagi generate pipeline ishlamaydi
+    }
+
     const workerScript = path.resolve(__dirname, './jcode_worker.js');
 
     // Progress bosqichlari — taxminiy vaqtlarga qarab

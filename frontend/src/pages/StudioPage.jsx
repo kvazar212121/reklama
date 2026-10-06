@@ -239,7 +239,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
           <div className="studio-brand">
             <span className="studio-brand-icon">🎬</span>
             <span>
-              ADFORGE<b style={{ color: 'var(--gold)' }}>.AI</b> Studio
+              airek<b style={{ color: 'var(--gold)' }}>.uz</b> Studio
             </span>
           </div>
           <div className="studio-balance-badge">
