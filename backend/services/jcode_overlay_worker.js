@@ -53,8 +53,24 @@ const JCODE_PATH   = process.env.JCODE_PATH || '/home/devops/.local/bin/jcode';
 const DOCKER_IMAGE = process.env.JCODE_SANDBOX_IMAGE || 'adforge-jcode-sandbox:latest';
 const SANDBOX_TIMEOUT_MS = parseInt(process.env.JCODE_SANDBOX_TIMEOUT_MS || '3600000', 10);
 const CHROME_HOST_DIR = process.env.CHROME_CACHE_DIR || path.resolve(os.homedir(), '.cache/puppeteer');
-const CHROME_BIN_IN_SANDBOX = '/opt/chrome-cache/chrome/linux_arm-154.0.8037.57/chrome-linux-arm64/chrome';
-const CHROME_BIN_LOCAL = path.join(CHROME_HOST_DIR, 'chrome/linux_arm-154.0.8037.57/chrome-linux-arm64/chrome');
+// Chrome binary yo'lini avtomatik aniqlash (ARM/x86 va turli versiyalarga moslashuvchan).
+const findChromeRel = () => {
+  try {
+    const chromeRoot = path.join(CHROME_HOST_DIR, 'chrome');
+    for (const v of fss.readdirSync(chromeRoot)) {
+      const vdir = path.join(chromeRoot, v);
+      if (!fss.statSync(vdir).isDirectory()) continue;
+      for (const d of fss.readdirSync(vdir)) {
+        const candidate = path.join(vdir, d, 'chrome');
+        if (fss.existsSync(candidate)) return path.join('chrome', v, d, 'chrome');
+      }
+    }
+  } catch (_) {}
+  return null;
+};
+const CHROME_REL = findChromeRel() || 'chrome/linux-148.0.7778.97/chrome-linux64/chrome';
+const CHROME_BIN_IN_SANDBOX = `/opt/chrome-cache/${CHROME_REL}`;
+const CHROME_BIN_LOCAL = path.join(CHROME_HOST_DIR, CHROME_REL);
 
 const SFX_DIR        = path.resolve(__dirname, '../assets/sfx');
 const HF_LIB_DIR     = path.resolve(__dirname, '../assets/hyperframes-lib');
@@ -216,7 +232,6 @@ const runSandbox = (meta) => {
       '-e', 'JCODE_NO_TELEMETRY=1',
       '-e', 'HOME=/work',
       '-e', `HYPERFRAMES_BROWSER_PATH=${CHROME_BIN_IN_SANDBOX}`,
-      '-v', `${JCODE_PATH}:/usr/local/bin/jcode:ro`,
       '-v', `${CHROME_HOST_DIR}:/opt/chrome-cache:ro`,
       '-v', `${SFX_DIR}:/assets/sfx:ro`,
       '-v', `${HUBMUSIC_DIR}:/assets/hubmusic:ro`,

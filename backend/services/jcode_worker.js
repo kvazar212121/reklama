@@ -97,8 +97,30 @@ const JCODE_PATH = process.env.JCODE_PATH || '/home/gvazar/.local/bin/jcode';
 const DOCKER_IMAGE = process.env.JCODE_SANDBOX_IMAGE || 'adforge-jcode-sandbox:latest';
 const SANDBOX_TIMEOUT_MS = parseInt(process.env.JCODE_SANDBOX_TIMEOUT_MS || '3600000', 10);
 const CHROME_HOST_DIR = process.env.CHROME_CACHE_DIR || path.resolve(os.homedir(), '.cache/puppeteer');
-const CHROME_BIN_IN_SANDBOX = '/opt/chrome-cache/chrome/linux_arm-154.0.8037.57/chrome-linux-arm64/chrome';
-const CHROME_BIN_LOCAL = path.join(CHROME_HOST_DIR, 'chrome/linux_arm-154.0.8037.57/chrome-linux-arm64/chrome');
+// Chrome binary yo'lini avtomatik aniqlash (ARM/x86 va turli versiyalarga moslashuvchan).
+// Puppeteer cache: <CHROME_HOST_DIR>/chrome/<platform-version>/chrome-*/chrome
+const findChromeRel = () => {
+  try {
+    const chromeRoot = path.join(CHROME_HOST_DIR, 'chrome');
+    const versions = fss.readdirSync(chromeRoot); // masalan: linux-148.0.7778.97 yoki linux_arm-154...
+    for (const v of versions) {
+      const vdir = path.join(chromeRoot, v);
+      if (!fss.statSync(vdir).isDirectory()) continue;
+      const inner = fss.readdirSync(vdir); // chrome-linux64 yoki chrome-linux-arm64
+      for (const d of inner) {
+        const candidate = path.join(vdir, d, 'chrome');
+        if (fss.existsSync(candidate)) {
+          // CHROME_HOST_DIR ga nisbatan: chrome/<v>/<d>/chrome
+          return path.join('chrome', v, d, 'chrome');
+        }
+      }
+    }
+  } catch (_) {}
+  return null;
+};
+const CHROME_REL = findChromeRel() || 'chrome/linux-148.0.7778.97/chrome-linux64/chrome';
+const CHROME_BIN_IN_SANDBOX = `/opt/chrome-cache/${CHROME_REL}`;
+const CHROME_BIN_LOCAL = path.join(CHROME_HOST_DIR, CHROME_REL);
 
 console.log(`[Worker ${JOB_ID}] Started — Style: ${selectedStyle.name} (${selectedStyle.id})`);
 console.log(`[Worker ${JOB_ID}] Idea: ${IDEA}`);
@@ -322,7 +344,6 @@ const runSandboxedFullPipeline = () => {
       '-e', 'JCODE_NO_TELEMETRY=1',
       '-e', 'HOME=/work',
       '-e', `HYPERFRAMES_BROWSER_PATH=${CHROME_BIN_IN_SANDBOX}`,
-      '-v', `${JCODE_PATH}:/usr/local/bin/jcode:ro`,
       '-v', `${CHROME_HOST_DIR}:/opt/chrome-cache:ro`,
       '-v', `${SFX_DIR}:/assets/sfx:ro`,
       '-v', `${HUBMUSIC_DIR}:/assets/hubmusic:ro`,
