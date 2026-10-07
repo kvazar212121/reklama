@@ -76,6 +76,7 @@ const runJob = (job) => {
         job.overlay_intensity || 'medium',
         job.music_style || '',
         String(job.add_music == null ? 1 : job.add_music),
+        String(job.add_subtitles == null ? 1 : job.add_subtitles),
       ], {
         cwd: path.resolve(__dirname, '..'),
         env: { ...process.env, PATH: `${process.env.PATH}:/home/devops/.local/bin` },

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, Download, Copy, Plus, User, Clock, Maximize2, Palette, Music, ShieldCheck, Check, AlertCircle, Pause, Play, Volume2, VolumeX, FileText, Zap } from 'lucide-react';
+import { Sparkles, Download, Copy, Plus, User, Clock, Maximize2, Palette, Music, ShieldCheck, Check, AlertCircle, Pause, Play, Volume2, VolumeX, FileText, Zap, Type } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './ResultPage.css';
@@ -351,6 +351,20 @@ export default function ResultPage({ theme, onThemeToggle }) {
                     </span>
                   </div>
                 </div>
+
+                {jobData?.jobType === 'overlay' && (
+                  <div className="res-spec-item">
+                    <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                      <Type size={18} strokeWidth={2.2} color="#f2c84b" />
+                    </span>
+                    <div className="res-spec-info">
+                      <span className="res-spec-label">Subtitrlar</span>
+                      <span className="res-spec-value">
+                        {jobData?.addSubtitles === 0 ? "O'chirilgan" : "Dinamik karaoke"}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="res-spec-item">
                   <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>

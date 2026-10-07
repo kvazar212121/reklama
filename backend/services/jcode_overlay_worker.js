@@ -25,10 +25,10 @@ const db   = require('../models/db');
 const { VALID_MUSIC_STYLE_IDS } = require('../config/musicStyles');
 
 // ── Args ──────────────────────────────────────────────────────────────────
-const [,, JOB_ID, SOURCE_VIDEO, OUTPUT_PATH, INTENSITY_ARG, MUSIC_STYLE_ARG, ADD_MUSIC_ARG] = process.argv;
+const [,, JOB_ID, SOURCE_VIDEO, OUTPUT_PATH, INTENSITY_ARG, MUSIC_STYLE_ARG, ADD_MUSIC_ARG, ADD_SUBTITLES_ARG] = process.argv;
 
 if (!JOB_ID || !SOURCE_VIDEO || !OUTPUT_PATH) {
-  console.error('Usage: node jcode_overlay_worker.js <jobId> <sourceVideo> <outputPath> [intensity] [musicStyle] [addMusic]');
+  console.error('Usage: node jcode_overlay_worker.js <jobId> <sourceVideo> <outputPath> [intensity] [musicStyle] [addMusic] [addSubtitles]');
   process.exit(1);
 }
 
@@ -40,6 +40,7 @@ if (!fss.existsSync(SOURCE_VIDEO)) {
 // Animatsiya zichligi: light | medium | heavy
 const INTENSITY = ['light', 'medium', 'heavy'].includes(INTENSITY_ARG) ? INTENSITY_ARG : 'medium';
 const ADD_MUSIC = ADD_MUSIC_ARG !== '0' && ADD_MUSIC_ARG !== 'false'; // default: qo'shiladi
+const ADD_SUBTITLES = ADD_SUBTITLES_ARG !== '0' && ADD_SUBTITLES_ARG !== 'false'; // default: qo'shiladi, lekin mijoz o'chirishi mumkin
 const MUSIC_PRESET = (MUSIC_STYLE_ARG && VALID_MUSIC_STYLE_IDS.includes(MUSIC_STYLE_ARG))
   ? MUSIC_STYLE_ARG
   : 'minimal'; // talking-head uchun past, bezovtalamaydigan fon
@@ -142,10 +143,20 @@ const buildOverlayPrompt = (meta) => {
   };
 
   const intensityRule = {
-    light:  'Kam, nozik: asosan dinamik subtitr + har 4-6 soniyada bitta kichik urg\'u animatsiyasi. Cutaway (to\'liq animatsiyaga o\'tish) YO\'Q yoki juda kam (eng ko\'pi 1 marta).',
-    medium: 'O\'rtacha: dinamik subtitr doimiy, muhim so\'zlarda urg\'u grafikalari (ikonka/strelka/raqam), 1-2 marta qisqa (2-3s) cutaway to\'liq animatsiya.',
-    heavy:  'Intensiv: deyarli har bir muhim so\'zga animatsiya, tez-tez kinetik grafikalar, 3-4 marta cutaway to\'liq animatsiya sahnalari — professional viral reels uslubi.',
+    light:  ADD_SUBTITLES
+      ? 'Kam, nozik: asosan dinamik subtitr + har 4-6 soniyada bitta kichik urg\'u animatsiyasi. Cutaway (to\'liq animatsiyaga o\'tish) YO\'Q yoki juda kam (eng ko\'pi 1 marta).'
+      : 'Kam, nozik: subtitrsiz, faqat har 4-6 soniyada bitta kichik nozik urg\'u animatsiyasi/ikonkasi. Cutaway YO\'Q yoki eng ko\'pi 1 marta.',
+    medium: ADD_SUBTITLES
+      ? 'O\'rtacha: dinamik subtitr doimiy, muhim so\'zlarda urg\'u grafikalari (ikonka/strelka/raqam), 1-2 marta qisqa (2-3s) cutaway to\'liq animatsiya.'
+      : 'O\'rtacha: subtitrsiz, muhim fikrlarda urg\'u grafikalari (ikonka/strelka/raqam), 1-2 marta qisqa (2-3s) cutaway to\'liq animatsiya.',
+    heavy:  ADD_SUBTITLES
+      ? 'Intensiv: dinamik subtitr + deyarli har bir muhim so\'zga animatsiya, tez-tez kinetik grafikalar, 3-4 marta cutaway to\'liq animatsiya sahnalari — professional viral reels uslubi.'
+      : 'Intensiv: subtitrsiz, deyarli har bir muhim so\'zga vizual animatsiya, tez-tez kinetik grafikalar, 3-4 marta cutaway to\'liq animatsiya sahnalari — professional viral reels uslubi.',
   }[INTENSITY];
+
+  const subtitleRule = ADD_SUBTITLES
+    ? '- DINAMIK SUBTITR (foydalanuvchi YOQGAN): gapirilayotgan so\'zlar pastki tasmada (xavfsiz zonadan pastda) so\'zma-so\'z, aytilgan vaqtida yonib/kattalashib chiqsin (word-by-word highlight, "karaoke" uslubi). words.json dagi start/end vaqtlariga ANIQ mos bo\'lsin.'
+    : '- SUBTITR QO\'YILMASIN (foydalanuvchi O\'CHIRIB QO\'YGAN): Ekranga HECH QANDAY so\'zma-so\'z gap subtitri, pastki matn yoki karaoke so\'zlar CHIQARMANG! Faqatgina vizual animatsiyalar, ikonka, strelka, grafik elementlar va cutaway infografikalar chiqsin. Butun video davomida matnli subtitr bo\'lmasin.';
 
   return `
 Siz professional video-montajchi va motion-grafika muhandisi AI agentisiz. Sizga mijoz GAPIRIB TURGAN tayyor videosi berilgan. Vazifangiz — shu videoning USTIGA, aytilayotgan so'zlarga millisekundgacha mos animatsiyalar qo'shib, uni zamonaviy viral (TikTok/Reels/Shorts) uslubidagi dinamik rolikka aylantirish. Siz noldan yangi video QILMAYSIZ — mavjud videoni BOYITASIZ.
@@ -171,7 +182,7 @@ Istisno: faqat "cutaway" (to'liq animatsiya) sahnalarida ekran butunlay animatsi
 Intensivlik darajasi (${INTENSITY}): ${intensityRule}
 
 ════════ ANIMATSIYA MAZMUNI ════════
-- DINAMIK SUBTITR (majburiy): gapirilayotgan so'zlar pastki tasmada (xavfsiz zonadan pastda) so'zma-so'z, aytilgan vaqtida yonib/kattalashib chiqsin (word-by-word highlight, "karaoke" uslubi). words.json dagi start/end vaqtlariga ANIQ mos bo'lsin.
+${subtitleRule}
 - URG'U GRAFIKALARI: muhim so'zlar (raqam, pul, foiz, mahsulot nomi, "eng", "yangi", "bepul" kabi) aytilganda o'sha vaqtda mos ikonka/raqam/strelka/emoji-grafika xavfsiz zonadan tashqarida sakrab chiqsin va yo'qolsin.
 - HARAKAT: strelkalar, doiralar, chiziqlar odamning tegishli tomoniga ishora qilsin (lekin yuzga emas). Kinetik tipografika ishlating.
 

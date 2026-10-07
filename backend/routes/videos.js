@@ -149,6 +149,7 @@ router.post('/overlay', requireAuth, checkAccess, uploadSourceVideo, async (req,
 
     const intensity = ['light', 'medium', 'heavy'].includes(req.body.intensity) ? req.body.intensity : 'medium';
     const addMusic = (req.body.addMusic === '0' || req.body.addMusic === 'false') ? 0 : 1;
+    const addSubtitles = (req.body.addSubtitles === '0' || req.body.addSubtitles === 'false') ? 0 : 1;
     const musicStyle = (req.body.musicStyle && VALID_MUSIC_STYLE_IDS.includes(req.body.musicStyle)) ? req.body.musicStyle : null;
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
@@ -172,12 +173,12 @@ router.post('/overlay', requireAuth, checkAccess, uploadSourceVideo, async (req,
 
     const jobId = uuidv4();
     db.prepare(`
-      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, overlay_intensity, add_music, music_style)
-      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'overlay', ?, ?, ?, ?)
-    `).run(jobId, user.id, 'Talking-head video overlay', req.file.path, intensity, addMusic, musicStyle);
+      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, overlay_intensity, add_music, music_style, add_subtitles)
+      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'overlay', ?, ?, ?, ?, ?)
+    `).run(jobId, user.id, 'Talking-head video overlay', req.file.path, intensity, addMusic, musicStyle, addSubtitles);
 
     setTimeout(processNextJob, 100);
-    console.log(`[API] New OVERLAY job: ${jobId} by ${user.id} | intensity=${intensity} music=${addMusic}`);
+    console.log(`[API] New OVERLAY job: ${jobId} by ${user.id} | intensity=${intensity} music=${addMusic} subtitles=${addSubtitles}`);
 
     res.status(201).json({
       success: true, jobId,
@@ -350,7 +351,7 @@ router.post('/create', requireAuth, checkAccess, uploadImages, async (req, res) 
 router.get('/status/:jobId', optionalAuth, (req, res) => {
   try {
     const job = db.prepare(`
-      SELECT id, status, progress, idea, mood, duration, output_path, error, created_at, updated_at
+      SELECT id, status, progress, idea, mood, duration, job_type, add_subtitles, add_music, output_path, error, created_at, updated_at
       FROM jobs WHERE id = ?
     `).get(req.params.jobId);
 
@@ -388,6 +389,9 @@ router.get('/status/:jobId', optionalAuth, (req, res) => {
       idea: job.idea,
       mood: job.mood,
       duration: job.duration,
+      jobType: job.job_type,
+      addSubtitles: job.add_subtitles,
+      addMusic: job.add_music,
       videoUrl,
       error: actualStatus === 'done' ? null : job.error,
     });

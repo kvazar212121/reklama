@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Film, Video, Sparkles, Zap, Flame, Music, ShieldCheck, Wand2, ArrowLeft, Check, AlertCircle, X } from 'lucide-react';
+import { Film, Video, Sparkles, Zap, Flame, Music, ShieldCheck, Wand2, ArrowLeft, Check, AlertCircle, X, Type } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './OverlayPage.css';
@@ -19,6 +19,7 @@ export default function OverlayPage({ theme, onThemeToggle }) {
   const [video, setVideo] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
   const [intensity, setIntensity] = useState('medium');
+  const [addSubtitles, setAddSubtitles] = useState(true);
   const [addMusic, setAddMusic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -61,6 +62,7 @@ export default function OverlayPage({ theme, onThemeToggle }) {
       const formData = new FormData();
       formData.append('video', video);
       formData.append('intensity', intensity);
+      formData.append('addSubtitles', addSubtitles ? '1' : '0');
       formData.append('addMusic', addMusic ? '1' : '0');
 
       const res = await fetch('/api/videos/overlay', {
@@ -177,8 +179,22 @@ export default function OverlayPage({ theme, onThemeToggle }) {
           </div>
         </div>
 
-        {/* MUSIC TOGGLE */}
-        <div className="overlay-section">
+        {/* TOGGLES: SUBTITLES & MUSIC */}
+        <div className="overlay-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
+          {/* SUBTITLE TOGGLE */}
+          <label className="overlay-music-toggle">
+            <input type="checkbox" checked={addSubtitles} onChange={(e) => setAddSubtitles(e.target.checked)} />
+            <span className="overlay-music-slider" />
+            <span className="overlay-music-text">
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Type size={16} strokeWidth={2.4} color="#f2c84b" />
+                <span>Dinamik subtitrlar (Karaoke matn)</span>
+              </span>
+              <small>{addSubtitles ? "Gapirilayotgan so'zlar sinxron yonib chiqadi" : "O'chirilgan — faqat vizual animatsiyalar chiqadi"}</small>
+            </span>
+          </label>
+
+          {/* MUSIC TOGGLE */}
           <label className="overlay-music-toggle">
             <input type="checkbox" checked={addMusic} onChange={(e) => setAddMusic(e.target.checked)} />
             <span className="overlay-music-slider" />
@@ -187,7 +203,7 @@ export default function OverlayPage({ theme, onThemeToggle }) {
                 <Music size={16} strokeWidth={2.4} color="#f2c84b" />
                 <span>Past ovozli fon musiqa qo'shilsin</span>
               </span>
-              <small>Ovozingizga xalaqit bermaydigan tinch fon musiqa (tavsiya etiladi)</small>
+              <small>Ovozingizga xalaqit bermaydigan tinch fon musiqa</small>
             </span>
           </label>
         </div>

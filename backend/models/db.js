@@ -128,6 +128,7 @@ addColumnIfNotExists('jobs', "job_type TEXT DEFAULT 'generate'"); // 'generate' 
 addColumnIfNotExists('jobs', 'source_video_path TEXT');           // overlay: mijoz yuklagan gapli video
 addColumnIfNotExists('jobs', "overlay_intensity TEXT DEFAULT 'medium'"); // light | medium | heavy
 addColumnIfNotExists('jobs', 'add_music INTEGER DEFAULT 1');      // overlay: fon musiqa qo'shilsinmi
+addColumnIfNotExists('jobs', 'add_subtitles INTEGER DEFAULT 1');  // overlay: subtitr (karaoke matn) qo'shilsinmi (1=ha, 0=yo'q)
 
 // Boshlang'ich tizim sozlamalari (Settings)
 const defaultSettings = [
