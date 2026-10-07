@@ -216,10 +216,10 @@ export default function App() {
           <Route path="/overlay" element={<OverlayPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/kinetic" element={<KineticPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/cabinet" element={<CabinetPage theme={theme} onThemeToggle={toggleTheme} />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/progress/:jobId" element={<ProgressPage />} />
-          <Route path="/result" element={<ResultPage />} />
-          <Route path="/result/:jobId" element={<ResultPage />} />
+          <Route path="/progress" element={<ProgressPage theme={theme} onThemeToggle={toggleTheme} />} />
+          <Route path="/progress/:jobId" element={<ProgressPage theme={theme} onThemeToggle={toggleTheme} />} />
+          <Route path="/result" element={<ResultPage theme={theme} onThemeToggle={toggleTheme} />} />
+          <Route path="/result/:jobId" element={<ResultPage theme={theme} onThemeToggle={toggleTheme} />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -359,19 +359,37 @@ router.get('/status/:jobId', optionalAuth, (req, res) => {
     }
 
     let videoUrl = null;
-    if (job.status === 'done' && job.output_path) {
+    let actualStatus = job.status;
+    let actualProgress = job.progress;
+
+    // Video fayli diskda allaqachon tayyormi tekshirish:
+    const candidatePath = job.output_path || path.resolve(__dirname, '../output', `${job.id}.mp4`);
+    if (fs.existsSync(candidatePath)) {
+      try {
+        const stat = fs.statSync(candidatePath);
+        if (stat.size > 50000) {
+          videoUrl = `/output/${path.basename(candidatePath)}`;
+          actualStatus = 'done';
+          actualProgress = 100;
+          if (job.status !== 'done' || !job.output_path) {
+            db.prepare("UPDATE jobs SET status = 'done', progress = 100, output_path = ?, error = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+              .run(candidatePath, job.id);
+          }
+        }
+      } catch (_) {}
+    } else if (job.status === 'done' && job.output_path) {
       videoUrl = `/output/${path.basename(job.output_path)}`;
     }
 
     res.json({
       success: true,
-      status: job.status,
-      progress: job.progress,
+      status: actualStatus,
+      progress: actualProgress,
       idea: job.idea,
       mood: job.mood,
       duration: job.duration,
       videoUrl,
-      error: job.error,
+      error: actualStatus === 'done' ? null : job.error,
     });
   } catch (err) {
     console.error('[API] Status error:', err);
@@ -395,18 +413,38 @@ router.get('/my', optionalAuth, (req, res) => {
       if (job.image_paths) {
         try { imageCount = JSON.parse(job.image_paths).length; } catch (_) { imageCount = 0; }
       }
+
+      let videoUrl = null;
+      let actualStatus = job.status;
+      const candidatePath = job.output_path || path.resolve(__dirname, '../output', `${job.id}.mp4`);
+      if (fs.existsSync(candidatePath)) {
+        try {
+          const stat = fs.statSync(candidatePath);
+          if (stat.size > 50000) {
+            videoUrl = `/output/${path.basename(candidatePath)}`;
+            actualStatus = 'done';
+            if (job.status !== 'done') {
+              db.prepare("UPDATE jobs SET status = 'done', progress = 100, output_path = ?, error = NULL WHERE id = ?")
+                .run(candidatePath, job.id);
+            }
+          }
+        } catch (_) {}
+      } else if (job.status === 'done' && job.output_path) {
+        videoUrl = `/output/${path.basename(job.output_path)}`;
+      }
+
       return {
         id: job.id,
-        status: job.status,
-        progress: job.progress,
+        status: actualStatus,
+        progress: actualStatus === 'done' ? 100 : job.progress,
         idea: job.idea,
         mood: job.mood,
         duration: job.duration,
         style: job.style,
         imageCount,
-        error: job.error,
+        error: actualStatus === 'done' ? null : job.error,
         createdAt: job.created_at,
-        videoUrl: job.status === 'done' && job.output_path ? `/output/${path.basename(job.output_path)}` : null,
+        videoUrl,
       };
     });
 
@@ -436,17 +474,18 @@ router.get('/download/:jobId', optionalAuth, (req, res) => {
       return res.status(404).json({ success: false, error: 'Job topilmadi' });
     }
 
+    const candidatePath = job.output_path || path.resolve(__dirname, '../output', `${job.id}.mp4`);
+    if (fs.existsSync(candidatePath)) {
+      const filename = `airek_${job.id.slice(0, 8)}.mp4`;
+      return res.download(candidatePath, filename);
+    }
+
     if (job.status !== 'done') {
       return res.status(400).json({ success: false, error: `Video hali tayyor emas. Holat: ${job.status}` });
     }
-
-    if (!job.output_path || !fs.existsSync(job.output_path)) {
-      return res.status(404).json({ success: false, error: 'Video fayl topilmadi' });
-    }
-
-    const filename = `reklam_${job.id.slice(0, 8)}.mp4`;
-    res.download(job.output_path, filename);
+    return res.status(404).json({ success: false, error: 'Video fayl topilmadi' });
   } catch (err) {
+    console.error('[API] Download error:', err);
     res.status(500).json({ success: false, error: 'Server xatosi' });
   }
 });

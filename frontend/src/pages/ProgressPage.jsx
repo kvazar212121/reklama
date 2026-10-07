@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
+import Navbar from '../components/Navbar';
 import './ProgressPage.css';
 
 const PROGRESS_STEPS = [
@@ -12,7 +13,7 @@ const PROGRESS_STEPS = [
   { id: 'rendering', num: '05', title: "Video Render",  desc: "1080p Full HD video yig'ilmoqda" },
 ];
 
-export default function ProgressPage() {
+export default function ProgressPage({ theme, onThemeToggle }) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -57,13 +58,7 @@ export default function ProgressPage() {
         if (data.success) {
           const { status, videoUrl, error } = data;
 
-          if (status === 'pending') {
-            setProgress(25);
-            setCurrentStep(0);
-          } else if (status === 'processing') {
-            setProgress((prev) => Math.min(prev + 10, 88));
-            setCurrentStep((prev) => Math.min(prev + 1, 4));
-          } else if (status === 'done') {
+          if (videoUrl || status === 'done') {
             setProgress(100);
             setCurrentStep(5);
             if (timer) clearInterval(timer);
@@ -71,7 +66,13 @@ export default function ProgressPage() {
               navigate(`/result/${jobId}`, {
                 state: { jobId, videoUrl, idea: idea || data.idea, mood, duration, style, imagePreview },
               });
-            }, 1200);
+            }, 600);
+          } else if (status === 'pending') {
+            setProgress(25);
+            setCurrentStep(0);
+          } else if (status === 'processing') {
+            setProgress((prev) => Math.min(prev + 10, 88));
+            setCurrentStep((prev) => Math.min(prev + 1, 4));
           } else if (status === 'failed') {
             if (timer) clearInterval(timer);
             setErrorMsg(error || 'Video yaratishda xatolik yuz berdi');
@@ -93,6 +94,7 @@ export default function ProgressPage() {
 
   return (
     <div className="progress-page">
+      <Navbar theme={theme} onThemeToggle={onThemeToggle} />
       <div className="progress-content">
         {/* Header */}
         <div className="progress-header">

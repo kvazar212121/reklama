@@ -99,12 +99,14 @@ const runJob = (job) => {
 
       proc.on('close', (code) => {
         clearTimeout(gt);
-        if (code === 0 && fs.existsSync(outputFile)) {
-          resolve(outputFile);
-        } else {
-          const m = lastErrLine.match(/Xatolik:\s*(.+)$/);
-          reject(new Error((m ? m[1] : lastErrLine) || `overlay worker exit ${code}`));
+        const hasValidOutput = fs.existsSync(outputFile) && (() => {
+          try { return fs.statSync(outputFile).size > 50000; } catch (_) { return false; }
+        })();
+        if (code === 0 || hasValidOutput) {
+          if (fs.existsSync(outputFile)) return resolve(outputFile);
         }
+        const m = lastErrLine.match(/Xatolik:\s*(.+)$/);
+        reject(new Error((m ? m[1] : lastErrLine) || `overlay worker exit ${code}`));
       });
       proc.on('error', (err) => { clearTimeout(gt); reject(new Error(`Overlay worker spawn error: ${err.message}`)); });
       return; // overlay yo'li shu yerda tugaydi — pastdagi generate pipeline ishlamaydi
@@ -143,8 +145,14 @@ const runJob = (job) => {
 
       proc.on('close', (code) => {
         clearTimeout(gt);
-        if (code === 0 && fs.existsSync(outputFile)) resolve(outputFile);
-        else { const m = lastErrLine.match(/Xatolik:\s*(.+)$/); reject(new Error((m ? m[1] : lastErrLine) || `kinetic worker exit ${code}`)); }
+        const hasValidOutput = fs.existsSync(outputFile) && (() => {
+          try { return fs.statSync(outputFile).size > 50000; } catch (_) { return false; }
+        })();
+        if (code === 0 || hasValidOutput) {
+          if (fs.existsSync(outputFile)) return resolve(outputFile);
+        }
+        const m = lastErrLine.match(/Xatolik:\s*(.+)$/);
+        reject(new Error((m ? m[1] : lastErrLine) || `kinetic worker exit ${code}`));
       });
       proc.on('error', (err) => { clearTimeout(gt); reject(new Error(`Kinetic worker spawn error: ${err.message}`)); });
       return;
@@ -206,15 +214,17 @@ const runJob = (job) => {
     proc.on('close', (code) => {
       timers.forEach(clearTimeout);
 
-      if (code === 0 && fs.existsSync(outputFile)) {
-        resolve(outputFile);
-      } else {
-        // Worker o'z xatosini stderr'ga "[Worker <id>] ❌ Xatolik: <sabab>" ko'rinishida yozadi —
-        // shu sababni (masalan moderatsiya rad javobini) foydalanuvchiga ko'rsatish uchun ajratib olamiz.
-        const reasonMatch = lastErrLine.match(/Xatolik:\s*(.+)$/);
-        const reason = reasonMatch ? reasonMatch[1] : lastErrLine;
-        reject(new Error(reason || `jcode_worker failed with exit code ${code}`));
+      const hasValidOutput = fs.existsSync(outputFile) && (() => {
+        try { return fs.statSync(outputFile).size > 50000; } catch (_) { return false; }
+      })();
+      if (code === 0 || hasValidOutput) {
+        if (fs.existsSync(outputFile)) return resolve(outputFile);
       }
+      // Worker o'z xatosini stderr'ga "[Worker <id>] ❌ Xatolik: <sabab>" ko'rinishida yozadi —
+      // shu sababni (masalan moderatsiya rad javobini) foydalanuvchiga ko'rsatish uchun ajratib olamiz.
+      const reasonMatch = lastErrLine.match(/Xatolik:\s*(.+)$/);
+      const reason = reasonMatch ? reasonMatch[1] : lastErrLine;
+      reject(new Error(reason || `jcode_worker failed with exit code ${code}`));
     });
 
     proc.on('error', (err) => {
