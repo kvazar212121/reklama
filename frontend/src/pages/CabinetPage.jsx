@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { LayoutDashboard, Film, CreditCard, Sparkles, Download, Eye, Sun, Moon, Home, HelpCircle, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import '../components/Navbar.css';
 import './CabinetPage.css';
@@ -22,9 +23,9 @@ const TX_STATUS_LABELS = {
 };
 
 const SECTIONS = [
-  { id: 'overview', icon: '📊', label: 'Umumiy' },
-  { id: 'videos', icon: '🎬', label: 'Videolarim' },
-  { id: 'payments', icon: '💳', label: "To'lovlar tarixi" },
+  { id: 'overview', icon: <LayoutDashboard size={16} strokeWidth={2.2} />, label: 'Umumiy' },
+  { id: 'videos',   icon: <Film size={16} strokeWidth={2.2} />,            label: 'Videolarim' },
+  { id: 'payments', icon: <CreditCard size={16} strokeWidth={2.2} />,      label: "To'lovlar tarixi" },
 ];
 
 const LANGUAGES = [
@@ -184,12 +185,15 @@ export default function CabinetPage({ theme, onThemeToggle }) {
 
   const renderOverview = () => (
     <>
-      <div className="create-video-banner" onClick={() => navigate('/studio')}>
+      <div className="create-video-banner" onClick={() => navigate('/create')}>
         <div className="create-video-banner-text">
-          <h2>🎬 Yangi video yaratish</h2>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Sparkles size={22} strokeWidth={2.4} color="#f2c84b" />
+            <span>Yangi video yaratish</span>
+          </h2>
           <p>G'oyangizni yozing — AI siz uchun professional reklama videosini tayyorlaydi</p>
         </div>
-        <button className="btn-create-video" onClick={() => navigate('/studio')}>Video yaratish →</button>
+        <button className="btn-create-video" onClick={() => navigate('/create')}>Video yaratish →</button>
       </div>
 
       {limits && (
@@ -237,8 +241,14 @@ export default function CabinetPage({ theme, onThemeToggle }) {
                   <span className={`status-badge ${st.className}`}>{st.label}</span>
                   {job.status === 'done' && job.videoUrl && (
                     <>
-                      <a className="btn-view" href={job.videoUrl} target="_blank" rel="noreferrer">Ko'rish</a>
-                      <a className="btn-download" href={`/api/videos/download/${job.id}`}>⬇ Yuklab olish</a>
+                      <a className="btn-view" href={job.videoUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <Eye size={13} strokeWidth={2.4} />
+                        <span>Ko'rish</span>
+                      </a>
+                      <a className="btn-download" href={`/api/videos/download/${job.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <Download size={13} strokeWidth={2.4} />
+                        <span>Yuklab olish</span>
+                      </a>
                     </>
                   )}
                 </div>
@@ -257,8 +267,10 @@ export default function CabinetPage({ theme, onThemeToggle }) {
     <div className="cabinet-shell">
       {/* Yuqoridagi ingichka panel — faqat logo, til, mavzu, chiqish */}
       <header className="cabinet-topbar">
-        <div className="cabinet-logo" onClick={() => navigate('/')}>
-          <div className="logo-icon">🎬</div>
+        <div className="cabinet-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          <div className="logo-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Film size={18} strokeWidth={2.4} color="#f2c84b" />
+          </div>
           <span>airek<b style={{ color: 'var(--gold)' }}>.uz</b></span>
         </div>
         <div className="cabinet-topbar-actions">
@@ -273,8 +285,8 @@ export default function CabinetPage({ theme, onThemeToggle }) {
               </button>
             ))}
           </div>
-          <button className="theme-toggle" onClick={onThemeToggle} title="Mavzuni o'zgartirish">
-            {theme === 'dark' ? '☀️' : '🌙'}
+          <button className="theme-toggle" onClick={onThemeToggle} title="Mavzuni o'zgartirish" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {theme === 'dark' ? <Sun size={16} strokeWidth={2.2} /> : <Moon size={16} strokeWidth={2.2} />}
           </button>
           <button className="btn-logout" onClick={logout}>Chiqish</button>
         </div>
@@ -298,7 +310,10 @@ export default function CabinetPage({ theme, onThemeToggle }) {
 
           <div className="sidebar-block sidebar-credits">
             <span className="credits-label">Hisobingizda</span>
-            <span className="credits-value">{isAdmin ? 'Cheksiz ⚡' : `${credits} ta video`}</span>
+            <span className="credits-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Zap size={14} fill="currentColor" color="#f2c84b" />
+              <span>{isAdmin ? 'Cheksiz' : `${credits} ta video`}</span>
+            </span>
             <button className="btn-topup" onClick={() => navigate('/#pricing')}>To'ldirish</button>
           </div>
 
@@ -320,16 +335,16 @@ export default function CabinetPage({ theme, onThemeToggle }) {
           <nav className="sidebar-block sidebar-nav">
             <p className="sidebar-nav-heading">Sayt</p>
             <button className="sidebar-nav-item" onClick={() => navigate('/')}>
-              <span className="sidebar-nav-icon">🏠</span><span>Bosh sahifa</span>
+              <span className="sidebar-nav-icon"><Home size={15} strokeWidth={2.2} /></span><span>Bosh sahifa</span>
             </button>
             <button className="sidebar-nav-item" onClick={() => navigate('/#how-it-works')}>
-              <span className="sidebar-nav-icon">⚙️</span><span>Qanday ishlaydi</span>
+              <span className="sidebar-nav-icon"><HelpCircle size={15} strokeWidth={2.2} /></span><span>Qanday ishlaydi</span>
             </button>
             <button className="sidebar-nav-item" onClick={() => navigate('/#pricing')}>
-              <span className="sidebar-nav-icon">🏷️</span><span>Tariflar</span>
+              <span className="sidebar-nav-icon"><CreditCard size={15} strokeWidth={2.2} /></span><span>Tariflar</span>
             </button>
-            <button className="sidebar-nav-item" onClick={() => navigate('/studio')}>
-              <span className="sidebar-nav-icon">🎬</span><span>Video Yaratish</span>
+            <button className="sidebar-nav-item" onClick={() => navigate('/create')}>
+              <span className="sidebar-nav-icon"><Sparkles size={15} strokeWidth={2.2} /></span><span>Video Yaratish</span>
             </button>
           </nav>
         </aside>

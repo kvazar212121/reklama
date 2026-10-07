@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { CheckCircle2, Gift, X } from 'lucide-react';
 import './i18n';
 import './index.css';
 
@@ -44,7 +45,10 @@ function PaymentBanner() {
       fontSize: '14px',
       boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
     }}>
-      <span>🎉 To'lov muvaffaqiyatli qabul qilindi!</span>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <CheckCircle2 size={18} strokeWidth={2.4} color="#22c55e" />
+        <span>To'lov muvaffaqiyatli qabul qilindi!</span>
+      </span>
       {user && typeof user.credits === 'number' && (
         <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>
           Balansingiz: {user.credits} ta video
@@ -58,11 +62,13 @@ function PaymentBanner() {
           border: 'none',
           color: 'inherit',
           cursor: 'pointer',
-          fontSize: '16px',
-          lineHeight: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '4px',
         }}
       >
-        ✕
+        <X size={16} />
       </button>
     </div>
   );
@@ -108,7 +114,10 @@ function WelcomeBonusBanner() {
       fontSize: '14px',
       boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
     }}>
-      <span>🎁 Xush kelibsiz! Sizga 1 ta bepul video krediti berildi (30 soniyalik animatsiya uchun).</span>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <Gift size={18} strokeWidth={2.2} color="#eab308" />
+        <span>Xush kelibsiz! Sizga 1 ta bepul video krediti berildi (30 soniyalik animatsiya uchun).</span>
+      </span>
       <button
         onClick={() => setShow(false)}
         aria-label="Yopish"
@@ -117,11 +126,13 @@ function WelcomeBonusBanner() {
           border: 'none',
           color: 'inherit',
           cursor: 'pointer',
-          fontSize: '16px',
-          lineHeight: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '4px',
         }}
       >
-        ✕
+        <X size={16} />
       </button>
     </div>
   );

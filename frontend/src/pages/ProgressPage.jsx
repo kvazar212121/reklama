@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
+import { Check, Film, AlertCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import './ProgressPage.css';
 
@@ -98,7 +98,9 @@ export default function ProgressPage({ theme, onThemeToggle }) {
       <div className="progress-content">
         {/* Header */}
         <div className="progress-header">
-          <div className="progress-logo">🎬</div>
+          <div className="progress-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Film size={46} strokeWidth={2.2} color="#f2c84b" />
+          </div>
           <h1 className="progress-title">Videongiz Tayyorlanmoqda</h1>
           <p className="progress-subtitle">
             Sun'iy intellekt video rolikni to'liq mustaqil yaratmoqda. Sifat uchun bu jarayon bir necha daqiqadan bir soatgacha davom etishi mumkin — sahifani yopmasdan kuting.
@@ -107,10 +109,12 @@ export default function ProgressPage({ theme, onThemeToggle }) {
 
         {errorMsg ? (
           <div className="card" style={{ padding: '36px', textAlign: 'center', maxWidth: '520px', margin: '0 auto' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+              <AlertCircle size={48} strokeWidth={2} color="#ef4444" />
+            </div>
             <h3 style={{ color: '#ef4444', marginBottom: '12px' }}>Xatolik yuz berdi</h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>{errorMsg}</p>
-            <button className="btn-primary" onClick={() => navigate('/')}>
+            <button className="btn-primary" onClick={() => navigate('/create')}>
               Qayta urinish
             </button>
           </div>

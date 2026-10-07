@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Palette, PenLine, Clock, Music, Maximize2, Image as ImageIcon, Film, Zap, Sparkles, Check, ArrowLeft, ArrowRight, AlertCircle, ClipboardList, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import StyleSelector from '../components/StyleSelector';
 import MusicStyleSelector from '../components/MusicStyleSelector';
@@ -48,7 +49,7 @@ const ASPECT_RATIOS = [
     badge: 'Eng mashhur',
     w: 54,
     h: 96,
-    platforms: '📱 TikTok · Reels · Stories',
+    platforms: 'TikTok · Reels · Stories',
   },
   {
     key: '16:9',
@@ -58,7 +59,7 @@ const ASPECT_RATIOS = [
     badge: null,
     w: 96,
     h: 54,
-    platforms: '🖥 YouTube · Facebook · TV',
+    platforms: 'YouTube · Facebook · TV',
   },
   {
     key: '1:1',
@@ -68,7 +69,7 @@ const ASPECT_RATIOS = [
     badge: null,
     w: 76,
     h: 76,
-    platforms: '📷 Instagram · Facebook',
+    platforms: 'Instagram · Facebook',
   },
   {
     key: '4:5',
@@ -78,17 +79,17 @@ const ASPECT_RATIOS = [
     badge: null,
     w: 64,
     h: 80,
-    platforms: '📸 Instagram Feed',
+    platforms: 'Instagram Feed',
   },
 ];
 
 const STEPS = [
-  { num: '01', label: 'Dizayn Stili', icon: '🎨' },
-  { num: '02', label: "Reklama G'oyasi", icon: '✍️' },
-  { num: '03', label: 'Video Davomiyligi', icon: '⏱' },
-  { num: '04', label: 'Musiqa Uslubi', icon: '🎵' },
-  { num: '05', label: 'Video Formati', icon: '📐' },
-  { num: '06', label: 'Rasm & Logo', icon: '🖼️' },
+  { num: '01', label: 'Dizayn Stili', icon: <Palette size={15} strokeWidth={2.2} /> },
+  { num: '02', label: "Reklama G'oyasi", icon: <PenLine size={15} strokeWidth={2.2} /> },
+  { num: '03', label: 'Video Davomiyligi', icon: <Clock size={15} strokeWidth={2.2} /> },
+  { num: '04', label: 'Musiqa Uslubi', icon: <Music size={15} strokeWidth={2.2} /> },
+  { num: '05', label: 'Video Formati', icon: <Maximize2 size={15} strokeWidth={2.2} /> },
+  { num: '06', label: 'Rasm & Logo', icon: <ImageIcon size={15} strokeWidth={2.2} /> },
 ];
 
 export default function StudioPage({ theme, onThemeToggle }) {
@@ -233,17 +234,18 @@ export default function StudioPage({ theme, onThemeToggle }) {
       <div className="studio-container">
         {/* ── TOP HEADER ── */}
         <div className="studio-top-bar">
-          <button className="studio-back-btn" onClick={() => navigate('/')}>
-            ← Orqaga
+          <button className="studio-back-btn" onClick={() => navigate('/create')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <ArrowLeft size={15} strokeWidth={2.4} />
+            <span>Orqaga</span>
           </button>
-          <div className="studio-brand">
-            <span className="studio-brand-icon">🎬</span>
+          <div className="studio-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Film size={18} strokeWidth={2.4} color="#f2c84b" />
             <span>
               airek<b style={{ color: 'var(--gold)' }}>.uz</b> Studio
             </span>
           </div>
-          <div className="studio-balance-badge">
-            <span>⚡</span>
+          <div className="studio-balance-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Zap size={13} fill="currentColor" strokeWidth={2.5} />
             <span>
               {user?.role === 'admin'
                 ? 'Cheksiz'
@@ -262,7 +264,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
             return (
               <div key={i} className={`studio-step-dot ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}>
                 <div className="studio-step-circle">
-                  {isDone ? '✓' : <span>{s.icon}</span>}
+                  {isDone ? <Check size={14} strokeWidth={3} /> : s.icon}
                 </div>
                 <span className="studio-step-label">{s.label}</span>
                 {i < STEPS.length - 1 && (
@@ -356,7 +358,14 @@ export default function StudioPage({ theme, onThemeToggle }) {
                   rows={8}
                 />
                 <div className="studio-char-row">
-                  <span>{errors.idea && <span className="studio-error">⚠ {errors.idea}</span>}</span>
+                  <span>
+                    {errors.idea && (
+                      <span className="studio-error" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <AlertCircle size={14} />
+                        <span>{errors.idea}</span>
+                      </span>
+                    )}
+                  </span>
                   <span className="studio-char-count">{idea.length} / {MAX_IDEA_LENGTH}</span>
                 </div>
               </div>
@@ -389,7 +398,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
                   {
                     key: 's30',
                     label: '30 soniya',
-                    icon: '⚡',
+                    icon: <Zap size={24} strokeWidth={2.2} color="#f2c84b" />,
                     desc: 'TikTok, Instagram Reels, storieslar uchun. (1 ta kredit — Bepul sinov uchun)',
                     badge: 'Bepul sinov (1 kredit)',
                     featured: true,
@@ -397,7 +406,7 @@ export default function StudioPage({ theme, onThemeToggle }) {
                   {
                     key: 's60',
                     label: '60 soniya',
-                    icon: '🎬',
+                    icon: <Film size={24} strokeWidth={2.2} color="#f2c84b" />,
                     desc: 'YouTube, Facebook va TV uchun. (2 ta kredit talab qilinadi)',
                     badge: '2 ta kredit',
                     featured: false,
@@ -410,10 +419,12 @@ export default function StudioPage({ theme, onThemeToggle }) {
                     onClick={() => setDuration(d.key)}
                   >
                     {d.badge && <span className="studio-dur-badge">{d.badge}</span>}
-                    <div className="studio-dur-icon">{d.icon}</div>
+                    <div className="studio-dur-icon" style={{ display: 'flex', alignItems: 'center' }}>{d.icon}</div>
                     <div className="studio-dur-label">{d.label}</div>
                     <div className="studio-dur-desc">{d.desc}</div>
-                    <div className={`studio-dur-check ${duration === d.key ? 'visible' : ''}`}>✓</div>
+                    <div className={`studio-dur-check ${duration === d.key ? 'visible' : ''}`}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
                   </button>
                 ))}
               </div>
@@ -486,7 +497,9 @@ export default function StudioPage({ theme, onThemeToggle }) {
                     <div className="studio-aspect-size">{ar.label}</div>
                     <div className="studio-aspect-desc">{ar.desc}</div>
                     <div className="studio-aspect-platforms">{ar.platforms}</div>
-                    <div className={`studio-dur-check ${aspectRatio === ar.key ? 'visible' : ''}`}>✓</div>
+                    <div className={`studio-dur-check ${aspectRatio === ar.key ? 'visible' : ''}`}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
                   </button>
                 ))}
               </div>
@@ -514,14 +527,18 @@ export default function StudioPage({ theme, onThemeToggle }) {
                     className="studio-btn-submit"
                     onClick={handleSubmit}
                     disabled={submitting}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                   >
                     {submitting ? (
                       <>
                         <span className="studio-submit-spinner" />
-                        Video yaratilmoqda...
+                        <span>Video yaratilmoqda...</span>
                       </>
                     ) : (
-                      <>🚀 Videoni Generatsiya Qilish</>
+                      <>
+                        <Sparkles size={18} strokeWidth={2.4} />
+                        <span>Videoni Generatsiya Qilish</span>
+                      </>
                     )}
                   </button>
                 </div>
@@ -537,8 +554,9 @@ export default function StudioPage({ theme, onThemeToggle }) {
                         className="studio-img-remove"
                         onClick={() => handleRemoveImage(i)}
                         aria-label="O'chirish"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >
-                        ✕
+                        <X size={13} />
                       </button>
                     </div>
                   ))}
@@ -557,7 +575,9 @@ export default function StudioPage({ theme, onThemeToggle }) {
                   onDrop={handleDrop}
                   onClick={() => fileRef.current?.click()}
                 >
-                  <div className="studio-dropzone-icon">🖼️</div>
+                  <div className="studio-dropzone-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ImageIcon size={44} strokeWidth={1.8} color="#f2c84b" />
+                  </div>
                   <p className="studio-dropzone-title">Rasm(lar) yuklash uchun bosing yoki shu yerga torting</p>
                   <p className="studio-dropzone-hint">PNG, JPG, WEBP · {MAX_IMAGES} tagacha · har biri 10MB gacha</p>
                 </div>
@@ -571,11 +591,19 @@ export default function StudioPage({ theme, onThemeToggle }) {
                 style={{ display: 'none' }}
                 onChange={(e) => { handleImagesAdd(e.target.files); e.target.value = ''; }}
               />
-              {errors.image && <span className="studio-error">⚠ {errors.image}</span>}
+              {errors.image && (
+                <span className="studio-error" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <AlertCircle size={14} />
+                  <span>{errors.image}</span>
+                </span>
+              )}
 
               {/* Summary before submit */}
               <div className="studio-summary-card">
-                <div className="studio-summary-title">📋 Buyurtma Xulosasi</div>
+                <div className="studio-summary-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ClipboardList size={18} strokeWidth={2.2} color="#f2c84b" />
+                  <span>Buyurtma Xulosasi</span>
+                </div>
                 <div className="studio-summary-grid">
                   <div className="studio-summary-item">
                     <span className="studio-summary-lbl">Stil</span>
@@ -607,8 +635,9 @@ export default function StudioPage({ theme, onThemeToggle }) {
               </div>
 
               {errors.submit && (
-                <div className="studio-submit-error">
-                  ⚠ {errors.submit}
+                <div className="studio-submit-error" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertCircle size={16} />
+                  <span>{errors.submit}</span>
                 </div>
               )}
             </div>

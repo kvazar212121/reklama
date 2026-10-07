@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Sparkles, Download, Copy, Plus, User, Clock, Maximize2, Palette, Music, ShieldCheck, Check, AlertCircle, Pause, Play, Volume2, VolumeX, FileText, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './ResultPage.css';
 
 const MOOD_LABELS = {
-  energetic: 'Energetik 🔥',
-  calm: 'Xotirjam 🌿',
-  happy: 'Quvnoq ✨',
-  cinematic: 'Kinematik 🎬',
-  corporate: 'Korporativ 💼',
+  energetic: 'Energetik',
+  calm: 'Xotirjam',
+  happy: 'Quvnoq',
+  cinematic: 'Kinematik',
+  corporate: 'Korporativ',
 };
 
 const STYLE_NAMES = {
@@ -156,12 +157,14 @@ export default function ResultPage({ theme, onThemeToggle }) {
           </div>
 
           <div className="res-top-right">
-            <div className="res-credits-pill">
-              ⚡ {user?.role === 'admin' ? 'Cheksiz' : `${user?.credits ?? 0} kredit`}
+            <div className="res-credits-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Zap size={13} fill="currentColor" />
+              <span>{user?.role === 'admin' ? 'Cheksiz' : `${user?.credits ?? 0} kredit`}</span>
             </div>
             {videoUrl && (
-              <button className="res-quick-download-btn" onClick={handleDownload}>
-                ⬇ Yuklab olish
+              <button className="res-quick-download-btn" onClick={handleDownload} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Download size={14} strokeWidth={2.6} />
+                <span>Yuklab olish</span>
               </button>
             )}
           </div>
@@ -189,16 +192,16 @@ export default function ResultPage({ theme, onThemeToggle }) {
                   />
                   {/* Pleyer ustidagi tezkor boshqaruv paneli */}
                   <div className="res-stage-overlay-bar" onClick={(e) => e.stopPropagation()}>
-                    <button className="res-stage-btn" onClick={togglePlay} title={isPlaying ? 'Pauza' : 'Ijro'}>
-                      {isPlaying ? '⏸' : '▶'}
+                    <button className="res-stage-btn" onClick={togglePlay} title={isPlaying ? 'Pauza' : 'Ijro'} style={{ display: 'flex', alignItems: 'center' }}>
+                      {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                     </button>
-                    <button className="res-stage-btn" onClick={toggleMute} title={isMuted ? 'Ovozni yoqish' : 'Ovozsiz'}>
-                      {isMuted ? '🔇' : '🔊'}
+                    <button className="res-stage-btn" onClick={toggleMute} title={isMuted ? 'Ovozni yoqish' : 'Ovozsiz'} style={{ display: 'flex', alignItems: 'center' }}>
+                      {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                     </button>
                     <div className="res-stage-spacer" />
                     <span className="res-stage-pill">MP4 • 1080p</span>
-                    <button className="res-stage-btn" onClick={toggleFullscreen} title="To'liq ekran">
-                      ⛶
+                    <button className="res-stage-btn" onClick={toggleFullscreen} title="To'liq ekran" style={{ display: 'flex', alignItems: 'center' }}>
+                      <Maximize2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -210,7 +213,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 </div>
               ) : errorMsg ? (
                 <div className="res-error-box">
-                  <div className="res-error-icon">❌</div>
+                  <div className="res-error-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+                    <AlertCircle size={44} strokeWidth={2} color="#ef4444" />
+                  </div>
                   <h3>Xatolik yuz berdi</h3>
                   <p>{errorMsg}</p>
                   <button className="res-retry-btn" onClick={() => navigate('/create')}>
@@ -231,7 +236,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
 
             {/* Video tagidagi tezkor banner */}
             <div className="res-bottom-alert">
-              <span className="res-alert-icon">⏳</span>
+              <span className="res-alert-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                <Clock size={20} strokeWidth={2.2} color="#f2c84b" />
+              </span>
               <span>
                 <strong>15 kunlik saqlash muddati:</strong> Ushbu video server xotirasini tejash uchun 15 kundan keyin o'chiriladi. Iltimos, hoziroq yuklab oling!
               </span>
@@ -243,7 +250,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
             {/* Katta Yuklab Olish Kartasi */}
             <div className="res-card res-action-card">
               <div className="res-action-header">
-                <div className="res-action-icon">🎉</div>
+                <div className="res-action-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Sparkles size={34} strokeWidth={2.4} color="#f2c84b" />
+                </div>
                 <div>
                   <h2 className="res-action-title">Video Tayyor!</h2>
                   <p className="res-action-sub">Yuqori sifatli 1080p MP4 formatida</p>
@@ -255,7 +264,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 onClick={handleDownload}
                 disabled={!videoUrl}
               >
-                <span className="res-dl-icon">⬇</span>
+                <span className="res-dl-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                  <Download size={24} strokeWidth={2.6} />
+                </span>
                 <span className="res-dl-text">
                   <b>Videoni Yuklab Olish</b>
                   <small>Full HD 1080p • MP4 (H.264)</small>
@@ -264,20 +275,26 @@ export default function ResultPage({ theme, onThemeToggle }) {
 
               <div className="res-action-buttons">
                 <button className="res-secondary-btn" onClick={handleCopyLink}>
-                  <span>🔗</span> {copied ? 'Nusxalandi! ✓' : 'Havolani nusxalash'}
+                  <Copy size={15} strokeWidth={2.2} />
+                  <span>{copied ? 'Nusxalandi!' : 'Havolani nusxalash'}</span>
                 </button>
                 <button className="res-secondary-btn" onClick={() => navigate('/create')}>
-                  <span>➕</span> Yangi video yaratish
+                  <Plus size={15} strokeWidth={2.4} />
+                  <span>Yangi video yaratish</span>
                 </button>
                 <button className="res-secondary-btn" onClick={() => navigate('/cabinet')}>
-                  <span>👤</span> Videolarim ro'yxati
+                  <User size={15} strokeWidth={2.2} />
+                  <span>Videolarim ro'yxati</span>
                 </button>
               </div>
             </div>
 
             {/* Video Tafsilotlari Kartasi */}
             <div className="res-card res-details-card">
-              <h3 className="res-card-heading">📋 Video ma'lumotlari</h3>
+              <h3 className="res-card-heading" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={18} strokeWidth={2.2} color="#f2c84b" />
+                <span>Video ma'lumotlari</span>
+              </h3>
 
               {currentIdea && (
                 <div className="res-idea-box">
@@ -288,7 +305,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
 
               <div className="res-specs-grid">
                 <div className="res-spec-item">
-                  <span className="res-spec-icon">⏱</span>
+                  <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Clock size={18} strokeWidth={2.2} color="#f2c84b" />
+                  </span>
                   <div className="res-spec-info">
                     <span className="res-spec-label">Davomiyligi</span>
                     <span className="res-spec-value">
@@ -298,7 +317,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 </div>
 
                 <div className="res-spec-item">
-                  <span className="res-spec-icon">📐</span>
+                  <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Maximize2 size={18} strokeWidth={2.2} color="#f2c84b" />
+                  </span>
                   <div className="res-spec-info">
                     <span className="res-spec-label">Formati</span>
                     <span className="res-spec-value">
@@ -308,7 +329,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 </div>
 
                 <div className="res-spec-item">
-                  <span className="res-spec-icon">🎨</span>
+                  <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Palette size={18} strokeWidth={2.2} color="#f2c84b" />
+                  </span>
                   <div className="res-spec-info">
                     <span className="res-spec-label">Dizayn uslubi</span>
                     <span className="res-spec-value">
@@ -318,7 +341,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 </div>
 
                 <div className="res-spec-item">
-                  <span className="res-spec-icon">🎵</span>
+                  <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Music size={18} strokeWidth={2.2} color="#f2c84b" />
+                  </span>
                   <div className="res-spec-info">
                     <span className="res-spec-label">Audio & Musiqa</span>
                     <span className="res-spec-value">
@@ -328,7 +353,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 </div>
 
                 <div className="res-spec-item">
-                  <span className="res-spec-icon">💎</span>
+                  <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                    <ShieldCheck size={18} strokeWidth={2.2} color="#22c55e" />
+                  </span>
                   <div className="res-spec-info">
                     <span className="res-spec-label">Sifati</span>
                     <span className="res-spec-value">1080p Full HD • 60 FPS</span>
@@ -336,7 +363,9 @@ export default function ResultPage({ theme, onThemeToggle }) {
                 </div>
 
                 <div className="res-spec-item">
-                  <span className="res-spec-icon">🛡️</span>
+                  <span className="res-spec-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Check size={18} strokeWidth={2.8} color="#22c55e" />
+                  </span>
                   <div className="res-spec-info">
                     <span className="res-spec-label">Himoya</span>
                     <span className="res-spec-value">Suv belgisisiz (No Watermark)</span>

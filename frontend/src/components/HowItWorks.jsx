@@ -1,7 +1,12 @@
 import { useTranslation } from 'react-i18next';
+import { Target, Lightbulb, Wand2, Download, ArrowRight } from 'lucide-react';
 import './HowItWorks.css';
 
-const ICONS = ['💡', '🤖', '⬇'];
+const STEP_ICONS = [
+  <Lightbulb key="1" size={32} strokeWidth={2.2} color="#f2c84b" />,
+  <Wand2 key="2" size={32} strokeWidth={2.2} color="#f2c84b" />,
+  <Download key="3" size={32} strokeWidth={2.2} color="#f2c84b" />,
+];
 
 export default function HowItWorks() {
   const { t } = useTranslation();
@@ -11,8 +16,9 @@ export default function HowItWorks() {
     <section className="how-section section" id="how-it-works">
       <div className="container">
         <div className="how-header">
-          <div className="badge" style={{ marginBottom: '16px' }}>
-            <span>🎯</span> {t('howItWorks.title')}
+          <div className="badge" style={{ marginBottom: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Target size={14} strokeWidth={2.4} color="#f2c84b" />
+            <span>{t('howItWorks.title')}</span>
           </div>
           <h2 style={{ fontSize: '2.2rem', marginBottom: '12px' }}>
             {t('howItWorks.title')}
@@ -26,11 +32,15 @@ export default function HowItWorks() {
           {steps.map((step, index) => (
             <div key={index} className="how-card card">
               <div className="how-step-num">{String(index + 1).padStart(2, '0')}</div>
-              <div className="how-icon">{ICONS[index]}</div>
+              <div className="how-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {STEP_ICONS[index]}
+              </div>
               <h3 className="how-card-title">{step.title}</h3>
               <p className="how-card-desc">{step.desc}</p>
               {index < steps.length - 1 && (
-                <div className="how-arrow">→</div>
+                <div className="how-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowRight size={20} strokeWidth={2.5} />
+                </div>
               )}
             </div>
           ))}

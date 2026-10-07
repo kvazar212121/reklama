@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { Sparkles, ArrowRight, CreditCard, Play } from 'lucide-react';
 import './HeroSection.css';
 
 export default function HeroSection({ onStart }) {
@@ -12,8 +13,9 @@ export default function HeroSection({ onStart }) {
         <div className="container hero-layout">
           {/* Left Copy */}
           <div className="hero-copy">
-            <div className="eyebrow">
-              Professional AI Video Platformasi
+            <div className="eyebrow" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={14} strokeWidth={2.4} color="#f2c84b" />
+              <span>Professional AI Video Platformasi</span>
             </div>
 
             <h1>
@@ -29,13 +31,15 @@ export default function HeroSection({ onStart }) {
               <button
                 className="hero-cta-btn"
                 onClick={() => navigate('/create')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}
               >
-                <span className="hero-cta-icon">🚀</span>
+                <Sparkles size={18} strokeWidth={2.4} />
                 <span>Bepul Boshlash</span>
-                <span className="hero-cta-arrow">→</span>
+                <ArrowRight size={16} strokeWidth={2.4} />
               </button>
-              <a href="#pricing" className="button button-line btn-secondary">
-                <span>💳</span> Tariflar & Narxlar
+              <a href="#pricing" className="button button-line btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <CreditCard size={16} strokeWidth={2.2} />
+                <span>Tariflar & Narxlar</span>
               </a>
             </div>
           </div>
@@ -53,8 +57,8 @@ export default function HeroSection({ onStart }) {
               </div>
 
               <div className="studio-screen">
-                <div className="studio-play" onClick={() => navigate('/create')} title="Video yaratish">
-                  ▶
+                <div className="studio-play" onClick={() => navigate('/create')} title="Video yaratish" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Play size={30} fill="currentColor" strokeWidth={0} />
                 </div>
               </div>
 

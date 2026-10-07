@@ -1,13 +1,14 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Film, Video, Sparkles, Zap, Flame, Music, ShieldCheck, Wand2, ArrowLeft, Check, AlertCircle, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './OverlayPage.css';
 
 const INTENSITIES = [
-  { key: 'light',  icon: '✨', label: 'Yengil',   desc: 'Kam, nozik animatsiya + subtitr. Jiddiy/rasmiy videolar uchun.' },
-  { key: 'medium', icon: '⚡', label: 'O\'rtacha', desc: 'Subtitr doimiy, muhim so\'zlarga grafika, ba\'zan to\'liq animatsiya. Tavsiya etiladi.', featured: true },
-  { key: 'heavy',  icon: '🔥', label: 'Intensiv', desc: 'Deyarli har so\'zga animatsiya, tez kesimlar — viral reels uslubi.' },
+  { key: 'light',  icon: <Sparkles size={24} strokeWidth={2} color="#f2c84b" />, label: 'Yengil',   desc: 'Kam, nozik animatsiya + subtitr. Jiddiy/rasmiy videolar uchun.' },
+  { key: 'medium', icon: <Zap size={24} strokeWidth={2} color="#f2c84b" />,      label: 'O\'rtacha', desc: 'Subtitr doimiy, muhim so\'zlarga grafika, ba\'zan to\'liq animatsiya. Tavsiya etiladi.', featured: true },
+  { key: 'heavy',  icon: <Flame size={24} strokeWidth={2} color="#ef4444" />,    label: 'Intensiv', desc: 'Deyarli har so\'zga animatsiya, tez kesimlar — viral reels uslubi.' },
 ];
 
 export default function OverlayPage({ theme, onThemeToggle }) {
@@ -91,9 +92,18 @@ export default function OverlayPage({ theme, onThemeToggle }) {
 
       <div className="overlay-container">
         <div className="overlay-top-bar">
-          <button className="overlay-back-btn" onClick={() => navigate('/')}>← Orqaga</button>
-          <div className="overlay-brand">🎞️ Video ustiga <b>Animatsiya</b></div>
-          <div className="overlay-credits">⚡ {user?.role === 'admin' ? 'Cheksiz' : `${user?.credits ?? 0} kredit`}</div>
+          <button className="overlay-back-btn" onClick={() => navigate('/create')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <ArrowLeft size={15} strokeWidth={2.4} />
+            <span>Orqaga</span>
+          </button>
+          <div className="overlay-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Film size={18} strokeWidth={2.4} color="#f2c84b" />
+            <span>Video ustiga <b>Animatsiya</b></span>
+          </div>
+          <div className="overlay-credits" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Zap size={13} fill="currentColor" strokeWidth={2.5} />
+            <span>{user?.role === 'admin' ? 'Cheksiz' : `${user?.credits ?? 0} kredit`}</span>
+          </div>
         </div>
 
         <div className="overlay-hero">
@@ -122,7 +132,9 @@ export default function OverlayPage({ theme, onThemeToggle }) {
           />
           {!video ? (
             <div className="overlay-drop-empty">
-              <div className="overlay-drop-icon">📹</div>
+              <div className="overlay-drop-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Video size={48} strokeWidth={1.8} color="#f2c84b" />
+              </div>
               <div className="overlay-drop-title">Videoni shu yerga tashlang yoki tanlang</div>
               <div className="overlay-drop-sub">MP4, MOV, WEBM — 200 MB gacha</div>
             </div>
@@ -132,8 +144,10 @@ export default function OverlayPage({ theme, onThemeToggle }) {
               <button
                 className="overlay-change-btn"
                 onClick={(e) => { e.stopPropagation(); setVideo(null); setVideoPreview(null); fileInputRef.current.value = ''; }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                ✕ Boshqa video tanlash
+                <X size={14} />
+                <span>Boshqa video tanlash</span>
               </button>
             </div>
           )}
@@ -150,10 +164,14 @@ export default function OverlayPage({ theme, onThemeToggle }) {
                 onClick={() => setIntensity(it.key)}
               >
                 {it.featured && <span className="overlay-int-badge">Tavsiya</span>}
-                <div className="overlay-int-icon">{it.icon}</div>
+                <div className="overlay-int-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                  {it.icon}
+                </div>
                 <div className="overlay-int-label">{it.label}</div>
                 <div className="overlay-int-desc">{it.desc}</div>
-                <div className={`overlay-int-check ${intensity === it.key ? 'visible' : ''}`}>✓</div>
+                <div className={`overlay-int-check ${intensity === it.key ? 'visible' : ''}`}>
+                  <Check size={14} strokeWidth={3} />
+                </div>
               </button>
             ))}
           </div>
@@ -165,7 +183,10 @@ export default function OverlayPage({ theme, onThemeToggle }) {
             <input type="checkbox" checked={addMusic} onChange={(e) => setAddMusic(e.target.checked)} />
             <span className="overlay-music-slider" />
             <span className="overlay-music-text">
-              🎵 Past ovozli fon musiqa qo'shilsin
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Music size={16} strokeWidth={2.4} color="#f2c84b" />
+                <span>Past ovozli fon musiqa qo'shilsin</span>
+              </span>
               <small>Ovozingizga xalaqit bermaydigan tinch fon musiqa (tavsiya etiladi)</small>
             </span>
           </label>
@@ -173,7 +194,9 @@ export default function OverlayPage({ theme, onThemeToggle }) {
 
         {/* SAFE ZONE INFO */}
         <div className="overlay-info-box">
-          <div className="overlay-info-icon">🛡️</div>
+          <div className="overlay-info-icon" style={{ display: 'flex', alignItems: 'center' }}>
+            <ShieldCheck size={26} strokeWidth={2.2} color="#22c55e" />
+          </div>
           <div>
             <strong>Yuzingiz himoyalanadi.</strong> Animatsiyalar faqat chekka va chetki hududlarda
             chiqadi — gapirayotgan yuzingiz hech qachon yopilmaydi. Ba'zi joylarda butun ekran
@@ -181,10 +204,16 @@ export default function OverlayPage({ theme, onThemeToggle }) {
           </div>
         </div>
 
-        {error && <div className="overlay-error">⚠ {error}</div>}
+        {error && (
+          <div className="overlay-error" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertCircle size={18} strokeWidth={2.4} />
+            <span>{error}</span>
+          </div>
+        )}
 
-        <button className="overlay-submit-btn" disabled={submitting || !video} onClick={handleSubmit}>
-          {submitting ? 'Yuklanmoqda...' : '🎬 Animatsiya qo\'shish (1 kredit)'}
+        <button className="overlay-submit-btn" disabled={submitting || !video} onClick={handleSubmit} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <Wand2 size={20} strokeWidth={2.4} />
+          <span>{submitting ? 'Yuklanmoqda...' : 'Animatsiya qo\'shish (1 kredit)'}</span>
         </button>
       </div>
     </div>

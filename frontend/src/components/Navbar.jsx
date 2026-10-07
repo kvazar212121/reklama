@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Film, Sparkles, User, Zap, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -31,7 +32,9 @@ export default function Navbar({ theme, onThemeToggle }) {
       <div className="container navbar-inner">
         {/* Logo */}
         <div className="navbar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <div className="logo-icon">🎬</div>
+          <div className="logo-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Film size={20} strokeWidth={2.4} color="#f2c84b" />
+          </div>
           <span>airek<b style={{ color: 'var(--gold)' }}>.uz</b></span>
         </div>
 
@@ -40,8 +43,20 @@ export default function Navbar({ theme, onThemeToggle }) {
           <li><button className="nav-link-btn" onClick={() => scrollToSection('home')}>{t('nav.home')}</button></li>
           <li><button className="nav-link-btn" onClick={() => scrollToSection('how-it-works')}>{t('nav.howItWorks')}</button></li>
           <li><button className="nav-link-btn" onClick={() => scrollToSection('pricing')}>Tariflar</button></li>
-          <li><button className="nav-link-btn nav-link-studio" onClick={() => navigate('/create')}>🚀 Boshlash</button></li>
-          {user && <li><button className="nav-link-btn" onClick={() => navigate('/cabinet')}>👤 Kabinet</button></li>}
+          <li>
+            <button className="nav-link-btn nav-link-studio" onClick={() => navigate('/create')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={15} strokeWidth={2.4} />
+              <span>Boshlash</span>
+            </button>
+          </li>
+          {user && (
+            <li>
+              <button className="nav-link-btn" onClick={() => navigate('/cabinet')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <User size={15} strokeWidth={2.2} />
+                <span>Kabinet</span>
+              </button>
+            </li>
+          )}
         </ul>
 
         {/* Actions */}
@@ -65,7 +80,7 @@ export default function Navbar({ theme, onThemeToggle }) {
               }}
               title="Shaxsiy kabinetga o'tish"
             >
-              <span>⚡</span>
+              <Zap size={13} fill="currentColor" strokeWidth={2.5} />
               <span>{`${user.credits || 0} ta video`}</span>
             </div>
           )}
@@ -88,8 +103,9 @@ export default function Navbar({ theme, onThemeToggle }) {
             className="theme-toggle"
             onClick={onThemeToggle}
             title="Mavzuni o'zgartirish"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? <Sun size={17} strokeWidth={2.2} /> : <Moon size={17} strokeWidth={2.2} />}
           </button>
 
           {/* User Auth / Google Login */}

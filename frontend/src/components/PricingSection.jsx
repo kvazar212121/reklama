@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CreditCard, Gift, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './PricingSection.css';
 
@@ -79,7 +80,7 @@ export default function PricingSection() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(`🎉 ${data.message}`);
+        alert(data.message);
         setCheckoutStatus(null);
         refreshUser?.();
       } else {
@@ -94,8 +95,9 @@ export default function PricingSection() {
     <section className="pricing-section section" id="pricing">
       <div className="container">
         <div className="pricing-header">
-          <div className="badge" style={{ marginBottom: '16px' }}>
-            <span>💳</span> Qulay va Shaffof Narxlar
+          <div className="badge" style={{ marginBottom: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <CreditCard size={14} strokeWidth={2.4} color="#f2c84b" />
+            <span>Qulay va Shaffof Narxlar</span>
           </div>
           <h2 style={{ fontSize: '2.2rem', marginBottom: '12px' }}>
             Nechta video kerak bo'lsa, shuni tanlang
@@ -104,8 +106,9 @@ export default function PricingSection() {
             Hech qanday oylik majburiyat yo'q. Faqat o'zingizga kerakli miqdordagi videolarni sotib oling va xohlagan vaqtingizda ishlating.
           </p>
           {freeTier.enabled && (
-            <div style={{ marginTop: '16px', display: 'inline-block', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '8px 18px', borderRadius: '9999px', fontSize: '13px', fontWeight: '600' }}>
-              🎁 Yangi foydalanuvchilar uchun 1 ta video (30 soniyali animatsiya) mutlaqo bepul!
+            <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '8px 18px', borderRadius: '9999px', fontSize: '13px', fontWeight: '600' }}>
+              <Gift size={16} strokeWidth={2.2} />
+              <span>Yangi foydalanuvchilar uchun 1 ta video (30 soniyali animatsiya) mutlaqo bepul!</span>
             </div>
           )}
         </div>
@@ -128,23 +131,33 @@ export default function PricingSection() {
 
                 <ul className="pricing-features">
                   <li className="pricing-feature">
-                    <span className="pricing-feature-icon">✓</span>
+                    <span className="pricing-feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Check size={14} strokeWidth={2.8} />
+                    </span>
                     <strong>{p.credits} ta professional AI video</strong>
                   </li>
                   <li className="pricing-feature">
-                    <span className="pricing-feature-icon">✓</span>
+                    <span className="pricing-feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Check size={14} strokeWidth={2.8} />
+                    </span>
                     <span>1080p Full HD sifat va 60fps</span>
                   </li>
                   <li className="pricing-feature">
-                    <span className="pricing-feature-icon">✓</span>
+                    <span className="pricing-feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Check size={14} strokeWidth={2.8} />
+                    </span>
                     <span>Bitta video narxi: <strong>${pricePerVideo}</strong></span>
                   </li>
                   <li className="pricing-feature">
-                    <span className="pricing-feature-icon">✓</span>
+                    <span className="pricing-feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Check size={14} strokeWidth={2.8} />
+                    </span>
                     <span>Musiqa va animatsiyalar to'liq kiritilgan</span>
                   </li>
                   <li className="pricing-feature">
-                    <span className="pricing-feature-icon">✓</span>
+                    <span className="pricing-feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Check size={14} strokeWidth={2.8} />
+                    </span>
                     <span>Muddatsiz saqlanadi</span>
                   </li>
                 </ul>
@@ -165,10 +178,16 @@ export default function PricingSection() {
         {/* Payment Methods */}
         <div className="payment-methods-icons">
           <span>Qabul qilinadigan to'lov turlari:</span>
-          <span className="payment-card-badge">💳 Visa</span>
-          <span className="payment-card-badge">💳 Mastercard</span>
-          <span className="payment-card-badge">🍏 Apple Pay</span>
-          <span className="payment-card-badge">🍋 Lemon Squeezy</span>
+          <span className="payment-card-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <CreditCard size={13} strokeWidth={2.4} />
+            <span>Visa</span>
+          </span>
+          <span className="payment-card-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <CreditCard size={13} strokeWidth={2.4} />
+            <span>Mastercard</span>
+          </span>
+          <span className="payment-card-badge">Apple Pay</span>
+          <span className="payment-card-badge">Lemon Squeezy</span>
         </div>
 
         {/* Test Payment Modal */}
@@ -180,7 +199,9 @@ export default function PricingSection() {
             zIndex: 1000, padding: '20px'
           }}>
             <div className="card" style={{ maxWidth: '440px', width: '100%', padding: '32px', textAlign: 'center' }}>
-              <div style={{ fontSize: '42px', marginBottom: '12px' }}>💳</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                <CreditCard size={44} strokeWidth={2} color="#f2c84b" />
+              </div>
               <h3>To'lovni Sinovdan O'tkazish</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: '8px 0 20px' }}>
                 Hozirda tizim <strong>Lemon Squeezy Test (Sandbox)</strong> rejimida ishlamoqda.
@@ -202,8 +223,9 @@ export default function PricingSection() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button className="btn-primary" onClick={handleConfirmTestPayment}>
-                  ✓ Visa / Mastercard To'lovini Tasdiqlash (Test)
+                <button className="btn-primary" onClick={handleConfirmTestPayment} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <Check size={16} strokeWidth={2.8} />
+                  <span>Visa / Mastercard To'lovini Tasdiqlash (Test)</span>
                 </button>
                 <button className="btn-action" onClick={() => setCheckoutStatus(null)}>
                   Bekor qilish
