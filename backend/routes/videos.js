@@ -148,6 +148,8 @@ router.post('/overlay', requireAuth, checkAccess, uploadSourceVideo, async (req,
     }
 
     const intensity = ['light', 'medium', 'heavy'].includes(req.body.intensity) ? req.body.intensity : 'medium';
+    const animStyle = ['dynamic_neon', 'clean_minimal', 'viral_reels', 'gradient_modern'].includes(req.body.animStyle) ? req.body.animStyle : 'dynamic_neon';
+    const speed = ['energetic', 'normal', 'calm'].includes(req.body.speed) ? req.body.speed : 'normal';
     const addMusic = (req.body.addMusic === '0' || req.body.addMusic === 'false') ? 0 : 1;
     const addSubtitles = (req.body.addSubtitles === '0' || req.body.addSubtitles === 'false') ? 0 : 1;
     const musicStyle = (req.body.musicStyle && VALID_MUSIC_STYLE_IDS.includes(req.body.musicStyle)) ? req.body.musicStyle : null;
@@ -173,12 +175,12 @@ router.post('/overlay', requireAuth, checkAccess, uploadSourceVideo, async (req,
 
     const jobId = uuidv4();
     db.prepare(`
-      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, overlay_intensity, add_music, music_style, add_subtitles)
-      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'overlay', ?, ?, ?, ?, ?)
-    `).run(jobId, user.id, 'Talking-head video overlay', req.file.path, intensity, addMusic, musicStyle, addSubtitles);
+      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, style, overlay_intensity, add_music, music_style, add_subtitles, speed)
+      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'overlay', ?, ?, ?, ?, ?, ?, ?)
+    `).run(jobId, user.id, 'Talking-head video overlay', req.file.path, animStyle, intensity, addMusic, musicStyle, addSubtitles, speed);
 
     setTimeout(processNextJob, 100);
-    console.log(`[API] New OVERLAY job: ${jobId} by ${user.id} | intensity=${intensity} music=${addMusic} subtitles=${addSubtitles}`);
+    console.log(`[API] New OVERLAY job: ${jobId} by ${user.id} | style=${animStyle} intensity=${intensity} music=${addMusic} (${musicStyle || 'auto'}) speed=${speed} subtitles=${addSubtitles}`);
 
     res.status(201).json({
       success: true, jobId,
@@ -208,6 +210,8 @@ router.post('/kinetic', requireAuth, checkAccess, uploadSourceVideo, async (req,
 
     const design = VALID_DESIGNS.includes(req.body.design) ? req.body.design : 'bold_impact';
     const aspectRatio = ['9:16','16:9','1:1','4:5'].includes(req.body.aspectRatio) ? req.body.aspectRatio : '9:16';
+    const speed = ['energetic', 'normal', 'calm'].includes(req.body.speed) ? req.body.speed : 'normal';
+    const bgTheme = ['dark_ambient', 'clean_light', 'gradient_mesh'].includes(req.body.bgTheme) ? req.body.bgTheme : 'dark_ambient';
     const addMusic = (req.body.addMusic === '0' || req.body.addMusic === 'false') ? 0 : 1;
     const musicStyle = (req.body.musicStyle && VALID_MUSIC_STYLE_IDS.includes(req.body.musicStyle)) ? req.body.musicStyle : null;
 
@@ -229,12 +233,12 @@ router.post('/kinetic', requireAuth, checkAccess, uploadSourceVideo, async (req,
     const jobId = uuidv4();
     // idea ustunida matn, style ustunida dizayn uslubi saqlanadi
     db.prepare(`
-      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, style, aspect_ratio, overlay_intensity, add_music, music_style)
-      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'kinetic', ?, ?, ?, 'medium', ?, ?)
-    `).run(jobId, user.id, text || 'Audio kinetic typography', hasFile ? req.file.path : null, design, aspectRatio, addMusic, musicStyle);
+      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, style, aspect_ratio, overlay_intensity, add_music, music_style, speed, bg_theme)
+      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'kinetic', ?, ?, ?, 'medium', ?, ?, ?, ?)
+    `).run(jobId, user.id, text || 'Audio kinetic typography', hasFile ? req.file.path : null, design, aspectRatio, addMusic, musicStyle, speed, bgTheme);
 
     setTimeout(processNextJob, 100);
-    console.log(`[API] New KINETIC job: ${jobId} by ${user.id} | design=${design} source=${hasFile ? 'audio' : 'text'}`);
+    console.log(`[API] New KINETIC job: ${jobId} by ${user.id} | design=${design} music=${addMusic} (${musicStyle || 'auto'}) speed=${speed} bg=${bgTheme}`);
 
     res.status(201).json({
       success: true, jobId,

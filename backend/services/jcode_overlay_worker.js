@@ -25,10 +25,10 @@ const db   = require('../models/db');
 const { VALID_MUSIC_STYLE_IDS } = require('../config/musicStyles');
 
 // ── Args ──────────────────────────────────────────────────────────────────
-const [,, JOB_ID, SOURCE_VIDEO, OUTPUT_PATH, INTENSITY_ARG, MUSIC_STYLE_ARG, ADD_MUSIC_ARG, ADD_SUBTITLES_ARG] = process.argv;
+const [,, JOB_ID, SOURCE_VIDEO, OUTPUT_PATH, INTENSITY_ARG, MUSIC_STYLE_ARG, ADD_MUSIC_ARG, ADD_SUBTITLES_ARG, ANIM_STYLE_ARG, SPEED_ARG] = process.argv;
 
 if (!JOB_ID || !SOURCE_VIDEO || !OUTPUT_PATH) {
-  console.error('Usage: node jcode_overlay_worker.js <jobId> <sourceVideo> <outputPath> [intensity] [musicStyle] [addMusic] [addSubtitles]');
+  console.error('Usage: node jcode_overlay_worker.js <jobId> <sourceVideo> <outputPath> [intensity] [musicStyle] [addMusic] [addSubtitles] [animStyle] [speed]');
   process.exit(1);
 }
 
@@ -44,6 +44,15 @@ const ADD_SUBTITLES = ADD_SUBTITLES_ARG !== '0' && ADD_SUBTITLES_ARG !== 'false'
 const MUSIC_PRESET = (MUSIC_STYLE_ARG && VALID_MUSIC_STYLE_IDS.includes(MUSIC_STYLE_ARG))
   ? MUSIC_STYLE_ARG
   : 'minimal'; // talking-head uchun past, bezovtalamaydigan fon
+
+const ANIM_STYLE_DESCS = {
+  dynamic_neon: 'Dinamik Neon — zamonaviy neon yaltirash, yorqin kiber ranglar, futuristik va energetik kayfiyat.',
+  clean_minimal: 'Toza & Minimal — oq, qora va nozik moviy chiziqlar, jiddiy, professional korporativ uslub.',
+  viral_reels: 'Viral Reels — tezkor pop elementlar, o\'ynoqi harakatlar, diqqatni tortuvchi yorqin grafik belgilar (TikTok/Reels xiti).',
+  gradient_modern: 'Zamonaviy Gradient — yumshoq gradient o\'tishlar, premium estetika, lüks va nafis animatsiya qatlamlari.',
+};
+const ANIM_STYLE = ANIM_STYLE_DESCS[ANIM_STYLE_ARG] ? ANIM_STYLE_ARG : 'dynamic_neon';
+const SPEED = ['energetic', 'normal', 'calm'].includes(SPEED_ARG) ? SPEED_ARG : 'normal';
 
 // ── Papkalar / muhit ────────────────────────────────────────────────────────
 const WORK_DIR = path.resolve(os.tmpdir(), `airek_overlay_${JOB_ID}`);
@@ -181,7 +190,9 @@ Istisno: faqat "cutaway" (to'liq animatsiya) sahnalarida ekran butunlay animatsi
 2. CUTAWAY rejim (qisqa kesimlar): gapning qiziq/murakkab joyida (masalan "tasavvur qiling", "mana raqamlar", ro'yxat sanaganda) 2-3 soniyaga ekran TO'LIQ animatsiyali infografikaga o'tadi (odam ko'rinmaydi), so'ng "whoosh" bilan yana odamga qaytadi.
 Intensivlik darajasi (${INTENSITY}): ${intensityRule}
 
-════════ ANIMATSIYA MAZMUNI ════════
+════════ ANIMATSIYA MAZMUNI VA USLUBI ════════
+- VIZUAL USLUB: ${ANIM_STYLE_DESCS[ANIM_STYLE]}
+- TEZLIK / RITM: ${SPEED === 'energetic' ? 'Tezkor & Ritmik — harakatlar chaqqon, pop-up animatsiyalar qisqa va tez.' : SPEED === 'calm' ? 'Sokin & Nafis — silliq paydo bo\'lish, yumshoq o\'tishlar.' : 'Muvozanatli — gapirish sur\'atiga tabiiy mos keladigan me\'yoriy ritm.'}
 ${subtitleRule}
 - URG'U GRAFIKALARI: muhim so'zlar (raqam, pul, foiz, mahsulot nomi, "eng", "yangi", "bepul" kabi) aytilganda o'sha vaqtda mos ikonka/raqam/strelka/emoji-grafika xavfsiz zonadan tashqarida sakrab chiqsin va yo'qolsin.
 - HARAKAT: strelkalar, doiralar, chiziqlar odamning tegishli tomoniga ishora qilsin (lekin yuzga emas). Kinetik tipografika ishlating.

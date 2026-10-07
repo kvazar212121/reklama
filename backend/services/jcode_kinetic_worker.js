@@ -25,10 +25,10 @@ const fss  = require('fs');
 const db   = require('../models/db');
 const { VALID_MUSIC_STYLE_IDS } = require('../config/musicStyles');
 
-const [,, JOB_ID, SOURCE_PATH, OUTPUT_PATH, DESIGN_ARG, ASPECT_ARG, MUSIC_STYLE_ARG, ADD_MUSIC_ARG, TEXT_ARG] = process.argv;
+const [,, JOB_ID, SOURCE_PATH, OUTPUT_PATH, DESIGN_ARG, ASPECT_ARG, MUSIC_STYLE_ARG, ADD_MUSIC_ARG, TEXT_ARG, SPEED_ARG, BG_THEME_ARG] = process.argv;
 
 if (!JOB_ID || !OUTPUT_PATH) {
-  console.error('Usage: node jcode_kinetic_worker.js <jobId> <sourcePath|-> <outputPath> [designStyle] [aspectRatio] [musicStyle] [addMusic] [text]');
+  console.error('Usage: node jcode_kinetic_worker.js <jobId> <sourcePath|-> <outputPath> [designStyle] [aspectRatio] [musicStyle] [addMusic] [text] [speed] [bgTheme]');
   process.exit(1);
 }
 
@@ -47,6 +47,13 @@ const ASPECT = ['9:16','16:9','1:1','4:5'].includes(ASPECT_ARG) ? ASPECT_ARG : '
 const DIMS = { '9:16':{w:1080,h:1920}, '16:9':{w:1920,h:1080}, '1:1':{w:1080,h:1080}, '4:5':{w:1080,h:1350} }[ASPECT];
 const ADD_MUSIC = ADD_MUSIC_ARG !== '0' && ADD_MUSIC_ARG !== 'false';
 const MUSIC_PRESET = (MUSIC_STYLE_ARG && VALID_MUSIC_STYLE_IDS.includes(MUSIC_STYLE_ARG)) ? MUSIC_STYLE_ARG : 'minimal';
+const SPEED = ['energetic', 'normal', 'calm'].includes(SPEED_ARG) ? SPEED_ARG : 'normal';
+const BG_THEME_DESCS = {
+  dark_ambient: 'To\'q ambient — chuqur qora yoki to\'q ko\'k fon, yorqin matn bilan maksimal kontrast.',
+  clean_light: 'Toza yorug\' — oq yoki och kulrang toza fon, qora va urg\'u rangli harflar.',
+  gradient_mesh: 'Gradient Mesh — zamonaviy ko\'p rangli dinamik gradient fon.',
+};
+const BG_THEME = BG_THEME_DESCS[BG_THEME_ARG] ? BG_THEME_ARG : 'dark_ambient';
 const HAS_SOURCE = SOURCE_PATH && SOURCE_PATH !== '-' && fss.existsSync(SOURCE_PATH);
 const TEXT_ONLY = !HAS_SOURCE && TEXT_ARG && TEXT_ARG.trim().length > 0;
 
@@ -127,6 +134,10 @@ ${inputSection}
 ════════ DIZAYN USLUBI (${DESIGN}) ════════
 ${styleDesc}
 Shu uslubga QAT'IY rioya qiling — rang, shrift, fon, animatsiya xarakteri shu uslubga mos bo'lsin.
+
+════════ FON VA TEZLIK SOZLAMALARI ════════
+- Fon mavzusi: ${BG_THEME_DESCS[BG_THEME]}
+- Matn harakati va tezligi: ${SPEED === 'energetic' ? 'Tezkor & Ritmik — so\'zlar chaqqon, pop zarblar bilan tez almashadi (viral reels uslubi).' : SPEED === 'calm' ? 'Sokin & Keng — so\'zlar sekin, o\'qilishi qulay, nafis fade va siljishlar bilan chiqadi.' : 'Muvozanatli — tabiiy o\'qish va nutq sur\'atiga mos me\'yoriy tezlik.'}
 
 ════════ ASOSIY TALABLAR ════════
 - Format: ${ASPECT} | O'lcham: ${w}x${h}px | 25 fps | davomiylik ${dur}s.

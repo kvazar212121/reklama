@@ -127,8 +127,10 @@ addColumnIfNotExists('jobs', 'music_style TEXT'); // Mijoz aniq tanlagan musiqa 
 addColumnIfNotExists('jobs', "job_type TEXT DEFAULT 'generate'"); // 'generate' | 'overlay'
 addColumnIfNotExists('jobs', 'source_video_path TEXT');           // overlay: mijoz yuklagan gapli video
 addColumnIfNotExists('jobs', "overlay_intensity TEXT DEFAULT 'medium'"); // light | medium | heavy
-addColumnIfNotExists('jobs', 'add_music INTEGER DEFAULT 1');      // overlay: fon musiqa qo'shilsinmi
+addColumnIfNotExists('jobs', "add_music INTEGER DEFAULT 1");      // overlay/kinetic: fon musiqa qo'shilsinmi
 addColumnIfNotExists('jobs', 'add_subtitles INTEGER DEFAULT 1');  // overlay: subtitr (karaoke matn) qo'shilsinmi (1=ha, 0=yo'q)
+addColumnIfNotExists('jobs', "speed TEXT DEFAULT 'normal'");      // kinetic/overlay tezlik/sur'at: energetic | normal | calm
+addColumnIfNotExists('jobs', "bg_theme TEXT DEFAULT 'dark_ambient'"); // kinetic/overlay fon mavzusi: dark_ambient | clean_light | gradient_mesh
 
 // Boshlang'ich tizim sozlamalari (Settings)
 const defaultSettings = [

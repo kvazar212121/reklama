@@ -1,14 +1,36 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Film, Video, Sparkles, Zap, Flame, Music, ShieldCheck, Wand2, ArrowLeft, Check, AlertCircle, X, Type } from 'lucide-react';
+import { Film, Video, Sparkles, Zap, Flame, Music, ShieldCheck, Wand2, ArrowLeft, Check, AlertCircle, X, Type, Sliders, Palette } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './OverlayPage.css';
 
 const INTENSITIES = [
-  { key: 'light',  icon: <Sparkles size={24} strokeWidth={2} color="#f2c84b" />, label: 'Yengil',   desc: 'Kam, nozik animatsiya + subtitr. Jiddiy/rasmiy videolar uchun.' },
-  { key: 'medium', icon: <Zap size={24} strokeWidth={2} color="#f2c84b" />,      label: 'O\'rtacha', desc: 'Subtitr doimiy, muhim so\'zlarga grafika, ba\'zan to\'liq animatsiya. Tavsiya etiladi.', featured: true },
+  { key: 'light',  icon: <Sparkles size={24} strokeWidth={2} color="#f2c84b" />, label: 'Yengil',   desc: 'Kam, nozik animatsiya. Jiddiy/rasmiy videolar uchun.' },
+  { key: 'medium', icon: <Zap size={24} strokeWidth={2} color="#f2c84b" />,      label: 'O\'rtacha', desc: 'Muhim so\'zlarga grafika va qisqa cutaway. Tavsiya etiladi.', featured: true },
   { key: 'heavy',  icon: <Flame size={24} strokeWidth={2} color="#ef4444" />,    label: 'Intensiv', desc: 'Deyarli har so\'zga animatsiya, tez kesimlar — viral reels uslubi.' },
+];
+
+const ANIM_STYLES = [
+  { key: 'dynamic_neon',    icon: <Zap size={22} color="#00f0ff" strokeWidth={2.2} />,      label: 'Dinamik Neon',       desc: 'Yorqin kiber neon porlash, yuqori kontrast va texnologik kayfiyat.' },
+  { key: 'clean_minimal',   icon: <Sliders size={22} color="#38bdf8" strokeWidth={2.2} />,  label: 'Toza & Minimal',     desc: 'Oq, qora va moviy chiziqlar, jiddiy professional biznes uslubi.' },
+  { key: 'viral_reels',     icon: <Sparkles size={22} color="#fe2c55" strokeWidth={2.2} />, label: 'Viral Reels',       desc: 'Tezkor pop elementlar, o\'ynoqi harakatlar, diqqatni tortuvchi grafika.' },
+  { key: 'gradient_modern', icon: <Palette size={22} color="#f59e0b" strokeWidth={2.2} />,  label: 'Zamonaviy Gradient', desc: 'Yumshoq gradient o\'tishlar, nafis estetika va lüks qatlamlar.' },
+];
+
+const SPEEDS = [
+  { key: 'energetic', label: 'Tezkor (Energetic)', hint: 'Reels va TikTok dinamikasi' },
+  { key: 'normal',    label: 'Muvozanatli (Normal)', hint: 'Tabiiy nutq sur\'atida' },
+  { key: 'calm',      label: 'Sokin (Calm)',         hint: 'Sekin va nafis o\'tishlar' },
+];
+
+const OVERLAY_MUSIC_STYLES = [
+  { key: 'minimal',   label: 'Minimal & Sokin', desc: 'Toza, tinch fon (tavsiya etiladi)' },
+  { key: 'reels',     label: 'Quvnoq & Viral',  desc: 'TikTok va Instagram kayfiyati' },
+  { key: 'kiberpank', label: 'Bass & Energetik', desc: 'Ritmik, kuchli sintezator' },
+  { key: 'biznes',    label: 'Jiddiy & Xotirjam', desc: 'Korporativ va ishonchli' },
+  { key: 'kinematik', label: 'Epik & Kino',     desc: 'Keng va dramatik ohang' },
+  { key: 'oltin',     label: 'Nafis & Lüks',    desc: 'Yumshoq torli akkordlar' },
 ];
 
 export default function OverlayPage({ theme, onThemeToggle }) {
@@ -19,8 +41,11 @@ export default function OverlayPage({ theme, onThemeToggle }) {
   const [video, setVideo] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
   const [intensity, setIntensity] = useState('medium');
+  const [animStyle, setAnimStyle] = useState('dynamic_neon');
+  const [speed, setSpeed] = useState('normal');
   const [addSubtitles, setAddSubtitles] = useState(true);
   const [addMusic, setAddMusic] = useState(true);
+  const [musicStyle, setMusicStyle] = useState('minimal');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
@@ -62,8 +87,11 @@ export default function OverlayPage({ theme, onThemeToggle }) {
       const formData = new FormData();
       formData.append('video', video);
       formData.append('intensity', intensity);
+      formData.append('animStyle', animStyle);
+      formData.append('speed', speed);
       formData.append('addSubtitles', addSubtitles ? '1' : '0');
       formData.append('addMusic', addMusic ? '1' : '0');
+      if (addMusic && musicStyle) formData.append('musicStyle', musicStyle);
 
       const res = await fetch('/api/videos/overlay', {
         method: 'POST',
@@ -155,9 +183,9 @@ export default function OverlayPage({ theme, onThemeToggle }) {
           )}
         </div>
 
-        {/* INTENSITY */}
+        {/* 1. ANIMATSIYA ZICHLIGI */}
         <div className="overlay-section">
-          <h3 className="overlay-section-title">Animatsiya zichligi</h3>
+          <h3 className="overlay-section-title">1. Animatsiya zichligi</h3>
           <div className="overlay-intensity-cards">
             {INTENSITIES.map((it) => (
               <button
@@ -179,7 +207,52 @@ export default function OverlayPage({ theme, onThemeToggle }) {
           </div>
         </div>
 
-        {/* TOGGLES: SUBTITLES & MUSIC */}
+        {/* 2. VIZUAL ANIMATSIYA USLUBI */}
+        <div className="overlay-section">
+          <h3 className="overlay-section-title">2. Vizual animatsiya uslubi</h3>
+          <div className="overlay-intensity-cards" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            {ANIM_STYLES.map((st) => (
+              <button
+                key={st.key}
+                className={`overlay-int-card ${animStyle === st.key ? 'active' : ''}`}
+                onClick={() => setAnimStyle(st.key)}
+              >
+                <div className="overlay-int-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                  {st.icon}
+                </div>
+                <div className="overlay-int-label">{st.label}</div>
+                <div className="overlay-int-desc">{st.desc}</div>
+                <div className={`overlay-int-check ${animStyle === st.key ? 'visible' : ''}`}>
+                  <Check size={14} strokeWidth={3} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. ANIMATSIYA TEZLIGI / RITMI */}
+        <div className="overlay-section">
+          <h3 className="overlay-section-title">3. Animatsiya sur'ati & ritmi</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+            {SPEEDS.map((sp) => (
+              <button
+                key={sp.key}
+                type="button"
+                className={`overlay-int-card ${speed === sp.key ? 'active' : ''}`}
+                onClick={() => setSpeed(sp.key)}
+                style={{ padding: '16px 14px' }}
+              >
+                <div className="overlay-int-label" style={{ fontSize: '0.95rem' }}>{sp.label}</div>
+                <div className="overlay-int-desc" style={{ fontSize: '12px' }}>{sp.hint}</div>
+                <div className={`overlay-int-check ${speed === sp.key ? 'visible' : ''}`}>
+                  <Check size={14} strokeWidth={3} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. TOGGLES: SUBTITLES & MUSIC */}
         <div className="overlay-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
           {/* SUBTITLE TOGGLE */}
           <label className="overlay-music-toggle">
@@ -207,6 +280,30 @@ export default function OverlayPage({ theme, onThemeToggle }) {
             </span>
           </label>
         </div>
+
+        {/* 5. FON MUSIQA USLUBI (agar musiqa yoqilgan bo'lsa) */}
+        {addMusic && (
+          <div className="overlay-section">
+            <h3 className="overlay-section-title">5. Fon musiqa uslubi (janri)</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              {OVERLAY_MUSIC_STYLES.map((ms) => (
+                <button
+                  key={ms.key}
+                  type="button"
+                  className={`overlay-int-card ${musicStyle === ms.key ? 'active' : ''}`}
+                  onClick={() => setMusicStyle(ms.key)}
+                  style={{ padding: '14px 16px' }}
+                >
+                  <div className="overlay-int-label" style={{ fontSize: '0.95rem' }}>{ms.label}</div>
+                  <div className="overlay-int-desc" style={{ fontSize: '12px' }}>{ms.desc}</div>
+                  <div className={`overlay-int-check ${musicStyle === ms.key ? 'visible' : ''}`}>
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* SAFE ZONE INFO */}
         <div className="overlay-info-box">

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Type, Mic, Keyboard, Headphones, Flame, CircleDot, Zap, Palette, BookOpen, PenTool, Music, Wand2, ArrowLeft, Check, AlertCircle, X } from 'lucide-react';
+import { Type, Mic, Keyboard, Headphones, Flame, CircleDot, Zap, Palette, BookOpen, PenTool, Music, Wand2, ArrowLeft, Check, AlertCircle, X, Moon, Sun, Sliders } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import './KineticPage.css';
@@ -21,6 +21,27 @@ const RATIOS = [
   { key: '16:9', label: '16:9', hint: 'YouTube / landshaft' },
 ];
 
+const BG_THEMES = [
+  { key: 'dark_ambient',  icon: <Moon size={22} color="#f2c84b" strokeWidth={2.2} />,   label: 'To\'q Ambient',  desc: 'Chuqur qora/to\'q fon, maksimal matn kontrasti.' },
+  { key: 'clean_light',   icon: <Sun size={22} color="#f2c84b" strokeWidth={2.2} />,    label: 'Toza Yorug\'',   desc: 'Oq/och toza fon, qora va rangli harflar.' },
+  { key: 'gradient_mesh', icon: <Palette size={22} color="#ec4899" strokeWidth={2.2} />, label: 'Gradient Mesh', desc: 'Rang-barang zamonaviy gradient harakat.' },
+];
+
+const SPEEDS = [
+  { key: 'energetic', label: 'Tezkor & Ritmik', hint: 'Viral reels va TikTok xiti' },
+  { key: 'normal',    label: 'Muvozanatli',     hint: 'Tabiiy nutq sur\'atida' },
+  { key: 'calm',      label: 'Sokin & Keng',    hint: 'Sekin va nafis paydo bo\'lish' },
+];
+
+const KINETIC_MUSIC_STYLES = [
+  { key: 'kinetik',   label: 'Ritmik & Aniq',  desc: 'Stakkato zarblar, aniq ritm (tavsiya)' },
+  { key: 'reels',     label: 'Quvnoq & Viral', desc: 'TikTok va Instagram kayfiyati' },
+  { key: 'minimal',   label: 'Minimal & Sokin', desc: 'Toza, deyarli sezilmas fon' },
+  { key: 'kiberpank', label: 'Bass & Energetik', desc: 'Kiber sintezator va tez sur\'at' },
+  { key: 'biznes',    label: 'Jiddiy & Xotirjam', desc: 'Ishonchli va korporativ' },
+  { key: 'kinematik', label: 'Kino & Epik',     desc: 'Keng va dramatik musiqiy fon' },
+];
+
 export default function KineticPage({ theme, onThemeToggle }) {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -32,7 +53,10 @@ export default function KineticPage({ theme, onThemeToggle }) {
   const [text, setText] = useState('');
   const [design, setDesign] = useState('bold_impact');
   const [aspectRatio, setAspectRatio] = useState('9:16');
+  const [bgTheme, setBgTheme] = useState('dark_ambient');
+  const [speed, setSpeed] = useState('normal');
   const [addMusic, setAddMusic] = useState(true);
+  const [musicStyle, setMusicStyle] = useState('kinetik');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
@@ -81,7 +105,10 @@ export default function KineticPage({ theme, onThemeToggle }) {
       else formData.append('text', text.trim());
       formData.append('design', design);
       formData.append('aspectRatio', aspectRatio);
+      formData.append('bgTheme', bgTheme);
+      formData.append('speed', speed);
       formData.append('addMusic', addMusic ? '1' : '0');
+      if (addMusic && musicStyle) formData.append('musicStyle', musicStyle);
 
       const res = await fetch('/api/videos/kinetic', {
         method: 'POST',
@@ -211,9 +238,9 @@ export default function KineticPage({ theme, onThemeToggle }) {
           </div>
         )}
 
-        {/* DESIGN */}
+        {/* 1. DIZAYN USLUBI */}
         <div className="kin-section">
-          <h3 className="kin-section-title">Dizayn uslubi</h3>
+          <h3 className="kin-section-title">1. Dizayn uslubi (Typo Style)</h3>
           <div className="kin-design-grid">
             {DESIGNS.map((d) => (
               <button
@@ -235,9 +262,49 @@ export default function KineticPage({ theme, onThemeToggle }) {
           </div>
         </div>
 
-        {/* RATIO */}
+        {/* 2. FON KO'RINISHI */}
         <div className="kin-section">
-          <h3 className="kin-section-title">Video formati</h3>
+          <h3 className="kin-section-title">2. Fon ko'rinishi (Background)</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+            {BG_THEMES.map((b) => (
+              <button
+                key={b.key}
+                type="button"
+                className={`kin-design-card ${bgTheme === b.key ? 'active' : ''}`}
+                onClick={() => setBgTheme(b.key)}
+              >
+                <div className="kin-design-icon" style={{ display: 'flex', alignItems: 'center' }}>{b.icon}</div>
+                <div className="kin-design-label">{b.label}</div>
+                <div className="kin-design-desc">{b.desc}</div>
+                <div className={`kin-design-check ${bgTheme === b.key ? 'visible' : ''}`}>
+                  <Check size={14} strokeWidth={3} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. MATN HARAKATI TEZLIGI */}
+        <div className="kin-section">
+          <h3 className="kin-section-title">3. Matn harakati tezligi (Ritm)</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+            {SPEEDS.map((sp) => (
+              <button
+                key={sp.key}
+                type="button"
+                className={`kin-ratio-card ${speed === sp.key ? 'active' : ''}`}
+                onClick={() => setSpeed(sp.key)}
+              >
+                <div className="kin-ratio-label" style={{ fontSize: '1rem' }}>{sp.label}</div>
+                <div className="kin-ratio-hint">{sp.hint}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. VIDEO FORMATI */}
+        <div className="kin-section">
+          <h3 className="kin-section-title">4. Video formati</h3>
           <div className="kin-ratio-row">
             {RATIOS.map((r) => (
               <button
@@ -252,7 +319,7 @@ export default function KineticPage({ theme, onThemeToggle }) {
           </div>
         </div>
 
-        {/* MUSIC TOGGLE */}
+        {/* 5. FON MUSIQA TOGGLE */}
         <div className="kin-section">
           <label className="kin-music-toggle">
             <input type="checkbox" checked={addMusic} onChange={(e) => setAddMusic(e.target.checked)} />
@@ -266,6 +333,27 @@ export default function KineticPage({ theme, onThemeToggle }) {
             </span>
           </label>
         </div>
+
+        {/* 6. FON MUSIQA JANRI (agar yoqilgan bo'lsa) */}
+        {addMusic && (
+          <div className="kin-section">
+            <h3 className="kin-section-title">6. Fon musiqa uslubi (janri)</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              {KINETIC_MUSIC_STYLES.map((ms) => (
+                <button
+                  key={ms.key}
+                  type="button"
+                  className={`kin-ratio-card ${musicStyle === ms.key ? 'active' : ''}`}
+                  onClick={() => setMusicStyle(ms.key)}
+                  style={{ textAlign: 'left', padding: '14px 16px' }}
+                >
+                  <div className="kin-ratio-label" style={{ fontSize: '0.95rem' }}>{ms.label}</div>
+                  <div className="kin-ratio-hint" style={{ fontSize: '12px' }}>{ms.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="kin-error" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

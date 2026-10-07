@@ -77,6 +77,8 @@ const runJob = (job) => {
         job.music_style || '',
         String(job.add_music == null ? 1 : job.add_music),
         String(job.add_subtitles == null ? 1 : job.add_subtitles),
+        job.style || 'dynamic_neon',
+        job.speed || 'normal',
       ], {
         cwd: path.resolve(__dirname, '..'),
         env: { ...process.env, PATH: `${process.env.PATH}:/home/devops/.local/bin` },
@@ -126,6 +128,8 @@ const runJob = (job) => {
         job.music_style || '',
         String(job.add_music == null ? 1 : job.add_music),
         job.idea || '',                     // matn kontenti idea ustunida saqlanadi
+        job.speed || 'normal',
+        job.bg_theme || 'dark_ambient',
       ], {
         cwd: path.resolve(__dirname, '..'),
         env: { ...process.env, PATH: `${process.env.PATH}:/home/devops/.local/bin` },
