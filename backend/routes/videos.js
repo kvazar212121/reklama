@@ -115,9 +115,13 @@ const videoStorage = multer.diskStorage({
   },
 });
 const videoFilter = (req, file, cb) => {
-  const allowed = ['video/mp4', 'video/quicktime', 'video/x-matroska', 'video/webm', 'video/x-msvideo'];
+  const allowed = [
+    'video/mp4', 'video/quicktime', 'video/x-matroska', 'video/webm', 'video/x-msvideo',
+    // Kinetic typography uchun audio fayllar ham qabul qilinadi
+    'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/webm', 'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/x-m4a',
+  ];
   if (allowed.includes(file.mimetype)) cb(null, true);
-  else cb(new Error('Faqat video fayllar qabul qilinadi (MP4, MOV, WEBM, MKV)'), false);
+  else cb(new Error('Faqat video yoki audio fayllar qabul qilinadi'), false);
 };
 const uploadVideo = multer({
   storage: videoStorage,
@@ -182,6 +186,62 @@ router.post('/overlay', requireAuth, checkAccess, uploadSourceVideo, async (req,
     });
   } catch (err) {
     console.error('[API] Overlay error:', err);
+    res.status(500).json({ success: false, error: 'Server xatosi: ' + err.message });
+  }
+});
+
+// ── KINETIC TYPOGRAPHY: ovoz/matndan animatsion matn (ALOHIDA pipeline) ──
+// POST /api/videos/kinetic
+// Kirish: video/audio fayl (ovoz) YOKI matn (text). Dizayn uslubi tanlanadi.
+const VALID_DESIGNS = ['bold_impact','minimal_clean','neon_cyber','gradient_pop','editorial','handwritten'];
+router.post('/kinetic', requireAuth, checkAccess, uploadSourceVideo, async (req, res) => {
+  try {
+    const text = (req.body.text || '').trim();
+    const hasFile = Boolean(req.file);
+    if (!hasFile && !text) {
+      return res.status(400).json({ success: false, error: 'Iltimos, ovozli fayl yuklang yoki matn kiriting' });
+    }
+    if (text && text.length > 3000) {
+      return res.status(400).json({ success: false, error: 'Matn 3000 belgidan oshmasligi kerak' });
+    }
+
+    const design = VALID_DESIGNS.includes(req.body.design) ? req.body.design : 'bold_impact';
+    const aspectRatio = ['9:16','16:9','1:1','4:5'].includes(req.body.aspectRatio) ? req.body.aspectRatio : '9:16';
+    const addMusic = (req.body.addMusic === '0' || req.body.addMusic === 'false') ? 0 : 1;
+    const musicStyle = (req.body.musicStyle && VALID_MUSIC_STYLE_IDS.includes(req.body.musicStyle)) ? req.body.musicStyle : null;
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    if (!user) {
+      if (req.file) { try { fs.unlinkSync(req.file.path); } catch (_) {} }
+      return res.status(401).json({ success: false, requireLogin: true, error: 'Foydalanuvchi topilmadi. Iltimos, Google orqali kiring.' });
+    }
+
+    const isAdmin = user.role === 'admin';
+    if (!isAdmin && user.credits < 1) {
+      if (req.file) { try { fs.unlinkSync(req.file.path); } catch (_) {} }
+      return res.status(402).json({ success: false, needPayment: true, error: 'Animatsion matn video uchun hisobingizda kredit yo\'q. Tariflardan birini tanlang.' });
+    }
+    if (!isAdmin) {
+      db.prepare('UPDATE users SET credits = MAX(0, credits - 1), updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
+    }
+
+    const jobId = uuidv4();
+    // idea ustunida matn, style ustunida dizayn uslubi saqlanadi
+    db.prepare(`
+      INSERT INTO jobs (id, user_id, idea, mood, duration, status, progress, job_type, source_video_path, style, aspect_ratio, overlay_intensity, add_music, music_style)
+      VALUES (?, ?, ?, 'energetic', 's30', 'pending', 0, 'kinetic', ?, ?, ?, 'medium', ?, ?)
+    `).run(jobId, user.id, text || 'Audio kinetic typography', hasFile ? req.file.path : null, design, aspectRatio, addMusic, musicStyle);
+
+    setTimeout(processNextJob, 100);
+    console.log(`[API] New KINETIC job: ${jobId} by ${user.id} | design=${design} source=${hasFile ? 'audio' : 'text'}`);
+
+    res.status(201).json({
+      success: true, jobId,
+      remainingCredits: isAdmin ? 'unlimited' : user.credits - 1,
+      message: 'Animatsion matn video navbatga qo\'shildi',
+    });
+  } catch (err) {
+    console.error('[API] Kinetic error:', err);
     res.status(500).json({ success: false, error: 'Server xatosi: ' + err.message });
   }
 });

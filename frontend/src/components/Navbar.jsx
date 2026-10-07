@@ -40,8 +40,7 @@ export default function Navbar({ theme, onThemeToggle }) {
           <li><button className="nav-link-btn" onClick={() => scrollToSection('home')}>{t('nav.home')}</button></li>
           <li><button className="nav-link-btn" onClick={() => scrollToSection('how-it-works')}>{t('nav.howItWorks')}</button></li>
           <li><button className="nav-link-btn" onClick={() => scrollToSection('pricing')}>Tariflar</button></li>
-          <li><button className="nav-link-btn nav-link-studio" onClick={() => navigate('/studio')}>🎬 Video Yaratish</button></li>
-          <li><button className="nav-link-btn nav-link-overlay" onClick={() => navigate('/overlay')}>🎞️ Video Jonlantirish</button></li>
+          <li><button className="nav-link-btn nav-link-studio" onClick={() => navigate('/create')}>🚀 Boshlash</button></li>
           {user && <li><button className="nav-link-btn" onClick={() => navigate('/cabinet')}>👤 Kabinet</button></li>}
         </ul>
 

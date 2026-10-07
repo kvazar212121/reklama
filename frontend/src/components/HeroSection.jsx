@@ -28,9 +28,9 @@ export default function HeroSection({ onStart }) {
             <div className="hero-actions">
               <button
                 className="hero-cta-btn"
-                onClick={() => navigate('/studio')}
+                onClick={() => navigate('/create')}
               >
-                <span className="hero-cta-icon">🎬</span>
+                <span className="hero-cta-icon">🚀</span>
                 <span>Bepul Boshlash</span>
                 <span className="hero-cta-arrow">→</span>
               </button>
@@ -53,7 +53,7 @@ export default function HeroSection({ onStart }) {
               </div>
 
               <div className="studio-screen">
-                <div className="studio-play" onClick={onStart} title="Video yaratish">
+                <div className="studio-play" onClick={() => navigate('/create')} title="Video yaratish">
                   ▶
                 </div>
               </div>

@@ -183,7 +183,11 @@ Audio montaj: ffmpeg bilan [asl ovoz]${ADD_MUSIC ? ' + [past fon musiqa]' : ''} 
 
 ════════ MUHIT (konteyner ichida tayyor) ════════
 - ffmpeg, ffprobe PATH'da — video+overlay+audio montaj uchun asosiy vosita.
-- Node.js + 'puppeteer-core' + Chrome (${CHROME_BIN_IN_SANDBOX}): animatsiya qatlamini HTML/CSS/JS + GSAP bilan yozib, shaffof fon (transparent) ustida kadrma-kadr (PNG ketma-ketlik) render qilib, keyin ffmpeg "overlay" filtri bilan asl video ustiga qo'yish mumkin. GSAP: /opt/hf-lib/gsap.min.js
+- Node.js + 'puppeteer-core' + Chrome (${CHROME_BIN_IN_SANDBOX}): animatsiya qatlamini HTML/CSS/JS + GSAP bilan yozib, shaffof fon (transparent) ustida render qiling. GSAP: /opt/hf-lib/gsap.min.js
+  ★ TEZLIK (MUHIM): Animatsiyani HAR BIR KADRNI ALOHIDA PNG skrinshot qilish ENG SEKIN usul — buni ISHLATMANG. Buning o'rniga quyidagi TEZROQ usullardan birini tanlang:
+    (A) ENG TEZ — ffmpeg bilan to'g'ridan-to'g'ri: animatsiya elementlarini (dinamik subtitr, ikonka, strelka) ffmpeg drawtext/overlay/zoompan filtrlari yoki oldindan tayyorlangan kichik animatsiya bo'laklari (APNG/webm alpha) bilan asl video ustiga bitta ffmpeg buyrug'ida qo'ying. Brauzer umuman kerak bo'lmasa — eng tez yo'l shu.
+    (B) Agar murakkab GSAP animatsiya kerak bo'lsa — Puppeteer-core bilan sahifani ochib, Chrome DevTools Protocol "Page.startScreencast" yoki sahifa ichidagi MediaRecorder (canvas.captureStream) orqali animatsiyani BITTA shaffof webm/video oqimi sifatida YOZIB OLING (300 ta alohida PNG skrinshot EMAS — bitta uzluksiz yozuv). Bu kadr-kadr skrinshotdan bir necha barobar tez.
+  Qaysi usulni tanlasangiz ham, maqsad: minimal render vaqti. Bu server GPU'siz, shuning uchun eng kam hisoblash talab qiladigan yo'lni tanlang.
 - Ikonkalar: /opt/hf-lib/icons/*.svg (~90 ta), manifest: /opt/hf-lib/icons-manifest.json (teglar bo'yicha tez tanlash uchun). Shriftlar: /opt/hf-lib/fonts/*.woff2
 - SFX: /assets/sfx/*.mp3 (manifest.json bilan). Fon musiqa generatori: /assets/hubmusic/hubmusic.py (noldan sintez, copyright-free).
 - Dizayn sifati ma'lumotnomasi: /opt/impeccable/SKILL.md (o'qing — "AI slop" dan qoching, professional craft-floor saqlang).
@@ -200,7 +204,7 @@ Ish natijasi /work/final.mp4 bo'lsin:
 1. words.json ni o'qing — qaysi so'z qachon aytilganini, jumlalarni tahlil qiling. Qaysi so'zlarga urg'u, qayerda cutaway qilishni rejalashtiring.
 2. /opt/hf-lib dan GSAP, kerakli ikonka/shriftlarni /work/assets/ ga nusxalang. /opt/impeccable/SKILL.md ni o'qing.
 3. Animatsiya qatlami (HTML/CSS/GSAP) ni yozing — SHAFFOF fon, xavfsiz zona chegarasiga qat'iy rioya, word-timed timeline.
-4. Animatsiyani shaffof PNG ketma-ketlik yoki webm (alpha) sifatida ${width}x${height}, 25fps da render qiling (puppeteer-core bilan).
+4. Animatsiya qatlamini TEZ usulda tayyorlang (yuqoridagi ★ TEZLIK qoidasiga qarang): imkoni bo'lsa ffmpeg bilan to'g'ridan-to'g'ri (A usul), aks holda brauzerdan BITTA shaffof video oqimi sifatida yozib oling (B usul). HAR BIR KADRNI alohida PNG qilib skrinshot QILMANG — bu eng sekin va taqiqlangan.
 5. ${ADD_MUSIC ? 'hubmusic.py bilan past fon musiqa yarating. ' : ''}SFX larni mos vaqtlarga tayyorlang. Asl ovoz + ${ADD_MUSIC ? 'fon musiqa + ' : ''}SFX ni ffmpeg bilan bitta audioga montaj qiling.
 6. ffmpeg "overlay" filtri bilan: [asl video] ustiga [animatsiya qatlami] ni qo'ying, cutaway sahnalarida to'liq animatsiyaga almashtiring, montaj qilingan audioni ulang -> /work/final.mp4.
 7. ffprobe bilan natijani BIR marta tekshiring (o'lcham/davomiylik/audio). Muammolarni bitta to'plam qilib tuzating, kerak bo'lsa yana BITTA aylanish — va TO'XTANG. Cheksiz qayta-render qilmang.

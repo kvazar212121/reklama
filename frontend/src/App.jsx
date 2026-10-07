@@ -14,6 +14,8 @@ import ResultPage from './pages/ResultPage';
 import AdminPage from './pages/AdminPage';
 import StudioPage from './pages/StudioPage';
 import OverlayPage from './pages/OverlayPage';
+import KineticPage from './pages/KineticPage';
+import CreateHubPage from './pages/CreateHubPage';
 import CabinetPage from './pages/CabinetPage';
 
 // Lemon Squeezy to'lovidan qaytganda ko'rsatiladigan xabar.
@@ -209,8 +211,10 @@ export default function App() {
               <AdminPage />
             </AppLayout>
           } />
+          <Route path="/create" element={<CreateHubPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/studio" element={<StudioPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/overlay" element={<OverlayPage theme={theme} onThemeToggle={toggleTheme} />} />
+          <Route path="/kinetic" element={<KineticPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/cabinet" element={<CabinetPage theme={theme} onThemeToggle={toggleTheme} />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/:jobId" element={<ProgressPage />} />

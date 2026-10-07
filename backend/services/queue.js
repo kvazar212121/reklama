@@ -110,6 +110,46 @@ const runJob = (job) => {
       return; // overlay yo'li shu yerda tugaydi — pastdagi generate pipeline ishlamaydi
     }
 
+    // ── 'kinetic' — ovoz/matndan animatsion matn (kinetic typography) ──
+    if (job.job_type === 'kinetic') {
+      const kineticScript = path.resolve(__dirname, './jcode_kinetic_worker.js');
+      const proc = spawn('node', [
+        kineticScript,
+        job.id,
+        job.source_video_path || '-',
+        outputFile,
+        job.style || 'bold_impact',        // dizayn uslubi style ustunida saqlanadi
+        job.aspect_ratio || '9:16',
+        job.music_style || '',
+        String(job.add_music == null ? 1 : job.add_music),
+        job.idea || '',                     // matn kontenti idea ustunida saqlanadi
+      ], {
+        cwd: path.resolve(__dirname, '..'),
+        env: { ...process.env, PATH: `${process.env.PATH}:/home/devops/.local/bin` },
+        detached: false,
+      });
+
+      let lastErrLine = '';
+      proc.stdout.on('data', (d) => console.log(`[Kinetic ${job.id}]`, d.toString().trim()));
+      proc.stderr.on('data', (d) => {
+        const text = d.toString().trim();
+        console.error(`[Kinetic ${job.id}] ERR:`, text);
+        const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+        if (lines.length) lastErrLine = lines[lines.length - 1];
+      });
+
+      const kTimeout = parseInt(process.env.JOB_TIMEOUT_MS || '3900000', 10);
+      const gt = setTimeout(() => { proc.kill('SIGTERM'); reject(new Error(`Job timeout (${Math.round(kTimeout / 60000)} daqiqa)`)); }, kTimeout);
+
+      proc.on('close', (code) => {
+        clearTimeout(gt);
+        if (code === 0 && fs.existsSync(outputFile)) resolve(outputFile);
+        else { const m = lastErrLine.match(/Xatolik:\s*(.+)$/); reject(new Error((m ? m[1] : lastErrLine) || `kinetic worker exit ${code}`)); }
+      });
+      proc.on('error', (err) => { clearTimeout(gt); reject(new Error(`Kinetic worker spawn error: ${err.message}`)); });
+      return;
+    }
+
     const workerScript = path.resolve(__dirname, './jcode_worker.js');
 
     // Progress bosqichlari — taxminiy vaqtlarga qarab
