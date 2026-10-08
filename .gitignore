@@ -13,3 +13,6 @@ data/*.db-shm
 *.bak-*
 *.bak
 stt/venv/
+
+backend/stt/models/
+backend/stt/convert_venv/

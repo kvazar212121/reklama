@@ -102,7 +102,7 @@ const extractAudio = () => {
 const transcribe = (audioPath) => {
   const out = path.join(WORK_DIR, 'words.json');
   if (!fss.existsSync(STT_VENV) || !fss.existsSync(STT_PY)) throw new Error('STT muhiti yo\'q');
-  const r = spawnSync(STT_VENV, [STT_PY,'--input',audioPath,'--out',out,'--model','small'], { encoding:'utf8', timeout: 20*60*1000 });
+  const r = spawnSync(STT_VENV, [STT_PY,'--input',audioPath,'--out',out,'--model','navai','--lang','uz'], { encoding:'utf8', timeout: 20*60*1000 });
   if (r.status !== 0) throw new Error(`STT xatosi: ${r.stderr || r.stdout}`);
   return out;
 };
@@ -131,6 +131,12 @@ Siz professional MOTION-TIPOGRAFIKA (kinetic typography) dizayneri AI agentisiz.
 
 ${inputSection}
 
+════════ TIL QOIDASI (QAT'IY, ENG MUHIM) ════════
+- Matn O'ZBEK tilida (lotin alifbosida). words.json/script.txt dagi so'zlarni AYNAN shunday ko'rsating.
+- Ekranga chiqadigan BARCHA matn FAQAT o'zbekcha va FAQAT LOTIN alifbosida bo'lsin (o', g', sh, ch harflari bilan).
+- HECH QACHON arab, fors, kirill (rus), xitoy yoki boshqa yozuvdagi harflar ishlatmang. Hech narsani boshqa tilga TARJIMA QILMANG va o'zingizdan boshqa tilda gap QO'SHMANG.
+- Istisno: texnik/brend nomlari (Instagram, TikTok, AI, CRM, SMM, ROI kabi) asl lotin yozuvida qoladi.
+- Shrift lotin o'zbek belgilarini (o', g') to'g'ri chiqarishini tekshiring (/opt/hf-lib/fonts dan Latin Extended shrift tanlang).
 ════════ DIZAYN USLUBI (${DESIGN}) ════════
 ${styleDesc}
 Shu uslubga QAT'IY rioya qiling — rang, shrift, fon, animatsiya xarakteri shu uslubga mos bo'lsin.

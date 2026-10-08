@@ -131,7 +131,7 @@ const transcribe = (audioPath) => {
     throw new Error('STT muhiti o\'rnatilmagan (faster-whisper venv topilmadi)');
   }
   const r = spawnSync(STT_VENV, [
-    STT_PY, '--input', audioPath, '--out', outJson, '--model', 'small',
+    STT_PY, '--input', audioPath, '--out', outJson, '--model', 'navai', '--lang', 'uz',
   ], { encoding: 'utf8', timeout: 20 * 60 * 1000 });
   if (r.status !== 0) throw new Error(`STT xatosi: ${r.stderr || r.stdout || r.status}`);
   if (!fss.existsSync(outJson)) throw new Error('STT natija fayli yaratilmadi');
@@ -174,6 +174,14 @@ Siz professional video-montajchi va motion-grafika muhandisi AI agentisiz. Sizga
 - Asl video:        /work/source.mp4   (o'lcham: ${width}x${height}, davomiylik: ${duration}s)
 - So'z-vaqt JSON:   /work/words.json    (har bir so'z: {"word","start","end"} soniyalarda — ANIMATSIYALARNI SHUNGA MOSLASHTIRING)
   Bu JSON ichida "segments" (jumlalar) va "words" (har bir so'z aniq vaqti bilan) bor. "text" — to'liq matn.
+
+════════ TIL QOIDASI (QAT'IY, ENG MUHIM) ════════
+- Videodagi nutq O'ZBEK tilida. words.json O'ZBEKCHA LOTIN alifbosida tayyorlangan (maxsus o'zbek STT modeli bilan).
+- Ekranga chiqadigan BARCHA matn (subtitr, sarlavha, urg'u yozuvlari, cutaway matnlari) FAQAT o'zbek tilida, FAQAT LOTIN alifbosida bo'lsin (o', g', sh, ch harflari bilan: o'zbek, g'oya, shoshilinch).
+- HECH QACHON arab, fors, kirill (rus), xitoy yoki boshqa yozuvdagi harflar ishlatmang. Boshqa tildagi (rus/ingliz/arab) gaplarni o'zingizdan QO'SHMANG va TARJIMA QILMANG.
+- Istisno: texnik/brend nomlari (Instagram, TikTok, AI, CRM, SMM, ROI, marketing kabi) asl lotin yozuvida qolishi mumkin.
+- Matn shriftlari lotin o'zbek belgilarini (o', g', ʻ, ʼ) to'g'ri chiqarishini tekshiring (/opt/hf-lib/fonts dan Latin Extended qo'llab-quvvatlaydigan shrift tanlang).
+- words.json dagi so'zlarni o'zgartirmang, xato yozmang: aynan shu so'zlarni ko'rsating (faqat aniq imlo xatosini tuzatish mumkin, ma'noni o'zgartirmasdan).
 
 ════════ ASOSIY QOIDA — YUZNI HIMOYALASH (ENG MUHIM) ════════
 Videoda odam gapirib turibdi. Uning YUZINI hech qachon animatsiya bilan yopmang.
