@@ -207,7 +207,8 @@ Audio montaj: ffmpeg bilan [asl ovoz]${ADD_MUSIC ? ' + [past fon musiqa]' : ''} 
 - ffmpeg, ffprobe PATH'da — video+overlay+audio montaj uchun asosiy vosita.
 - Node.js + 'puppeteer-core' + Chrome (${CHROME_BIN_IN_SANDBOX}): animatsiya qatlamini HTML/CSS/JS + GSAP bilan yozib, shaffof fon (transparent) ustida render qiling. GSAP: /opt/hf-lib/gsap.min.js
   ★ TEZLIK (MUHIM): Animatsiyani HAR BIR KADRNI ALOHIDA PNG skrinshot qilish ENG SEKIN usul — buni ISHLATMANG. Buning o'rniga quyidagi TEZROQ usullardan birini tanlang:
-    (A) ENG TEZ — ffmpeg bilan to'g'ridan-to'g'ri: animatsiya elementlarini (dinamik subtitr, ikonka, strelka) ffmpeg drawtext/overlay/zoompan filtrlari yoki oldindan tayyorlangan kichik animatsiya bo'laklari (APNG/webm alpha) bilan asl video ustiga bitta ffmpeg buyrug'ida qo'ying. Brauzer umuman kerak bo'lmasa — eng tez yo'l shu.
+    (A) ENG TEZ — ffmpeg bilan: animatsiya elementlarini (dinamik subtitr, ikonka, strelka) ffmpeg drawtext/overlay/zoompan filtrlari bilan qo'ying.
+        DIQQAT: Agar PNG overlaylar 10 tadan ko'p bo'lsa, ularni bitta buyruqda 50-70 ta -i qilib bir vaqtda ochmang (bu xotirani to'ldirib, ffmpeg'ni qotirib qo'yadi). Buning o'rniga 8-10 tadan qilib bir necha qisqa bosqichda (batch: pass0, pass1...) qo'ying! Bu atigi 30-40 soniyada tugaydi.
     (B) Agar murakkab GSAP animatsiya kerak bo'lsa — Puppeteer-core bilan sahifani ochib, Chrome DevTools Protocol "Page.startScreencast" yoki sahifa ichidagi MediaRecorder (canvas.captureStream) orqali animatsiyani BITTA shaffof webm/video oqimi sifatida YOZIB OLING (300 ta alohida PNG skrinshot EMAS — bitta uzluksiz yozuv). Bu kadr-kadr skrinshotdan bir necha barobar tez.
   Qaysi usulni tanlasangiz ham, maqsad: minimal render vaqti. Bu server GPU'siz, shuning uchun eng kam hisoblash talab qiladigan yo'lni tanlang.
 - Ikonkalar: /opt/hf-lib/icons/*.svg (~90 ta), manifest: /opt/hf-lib/icons-manifest.json (teglar bo'yicha tez tanlash uchun). Shriftlar: /opt/hf-lib/fonts/*.woff2
@@ -253,7 +254,7 @@ const runSandbox = (meta) => {
 
     const dockerArgs = [
       'run', '--rm', '--name', containerName,
-      '--memory=2g', '--cpus=2', '--pids-limit=512',
+      '--memory=3g', '--cpus=2', '--pids-limit=2048',
       '--network', 'bridge',
       '--user', `${process.getuid()}:${process.getgid()}`,
       '-e', `DEEPSEEK_API_KEY=${apiKey}`,

@@ -187,7 +187,7 @@ const runSandbox = (meta) => new Promise((resolve) => {
   const containerName = `airek-kinetic-${JOB_ID}`;
   const dockerArgs = [
     'run','--rm','--name',containerName,
-    '--memory=2g','--cpus=2','--pids-limit=512','--network','bridge',
+    '--memory=3g','--cpus=2','--pids-limit=2048','--network','bridge',
     '--user', `${process.getuid()}:${process.getgid()}`,
     '-e', `DEEPSEEK_API_KEY=${apiKey}`,
     '-e','JCODE_NO_TELEMETRY=1','-e','HOME=/work',
