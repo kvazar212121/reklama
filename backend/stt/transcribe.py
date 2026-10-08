@@ -63,6 +63,22 @@ def normalize_word(w: str) -> str:
     return w.strip()
 
 
+def collapse_repeats(words, max_run=2):
+    """Bir xil so'zning ketma-ket takrorini (ki ki ki ki ...) max_run tagacha qisqartiradi.
+    Whisper gallyutsinatsiyasining odatiy belgisi; haqiqiy nutqda 3+ marta ketma-ket kam uchraydi."""
+    out, run = [], 1
+    for item in words:
+        key = item["word"].lower().strip(".,!?;:")
+        if out and out[-1]["word"].lower().strip(".,!?;:") == key:
+            run += 1
+            if run > max_run:
+                continue
+        else:
+            run = 1
+        out.append(item)
+    return out
+
+
 def script_stats(text: str):
     letters = [c for c in text if c.isalpha()]
     if not letters:
@@ -93,17 +109,36 @@ def main():
     threads = max(1, (os.cpu_count() or 2))
     model = WhisperModel(model_path, device="cpu", compute_type="int8", cpu_threads=threads)
 
-    segments, info = model.transcribe(
-        args.input,
+    base_kw = dict(
         language="uz",               # HAR DOIM o'zbek (auto-detect o'chirilgan)
         task="transcribe",
-        word_timestamps=True,
-        vad_filter=True,
         beam_size=5,
-        condition_on_previous_text=False,   # takrorlanish/gallyutsinatsiyani kamaytiradi
+        temperature=0.0,             # deterministik (ikki run bir xil natija berishi tekshirilgan)
+        condition_on_previous_text=False,
         no_repeat_ngram_size=4,
-        initial_prompt="Assalomu alaykum. Bugun biz biznes, marketing va tajriba haqida gaplashamiz.",
     )
+    # initial_prompt ataylab BERILMAYDI: u mavzuga moslab 'uydirma' so'z qo'shishi mumkin.
+    attempts = [
+        ("asosiy", dict(word_timestamps=True, vad_filter=True,
+                        repetition_penalty=1.15, hallucination_silence_threshold=1.5)),
+        ("zaxira-1", dict(word_timestamps=True, vad_filter=True)),
+        ("zaxira-2", dict(word_timestamps=False, vad_filter=True)),
+    ]
+    segments = info = None
+    last_err = None
+    for label, extra in attempts:
+        try:
+            seg_iter, info = model.transcribe(args.input, **base_kw, **extra)
+            segments = list(seg_iter)      # generatorni shu yerda ishga tushiramiz (xato shu yerda ushlanadi)
+            if label != "asosiy":
+                print(f"[STT] '{label}' rejimida bajarildi", file=sys.stderr)
+            break
+        except Exception as e:             # masalan find_alignment IndexError
+            last_err = e
+            print(f"[STT] '{label}' xato: {e}", file=sys.stderr)
+    if segments is None:
+        print(json.dumps({"error": f"STT barcha rejimlarda xato: {last_err}"}), file=sys.stderr)
+        sys.exit(3)
 
     words, seg_list, parts = [], [], []
     for seg in segments:
@@ -113,7 +148,8 @@ def main():
                 tok = normalize_word((w.word or "").strip())
                 if not tok or not re.search(r"[A-Za-z0-9]", tok):
                     continue
-                item = {"word": tok, "start": round(w.start, 3), "end": round(w.end, 3)}
+                item = {"word": tok, "start": round(w.start, 3), "end": round(w.end, 3),
+                        "p": round(float(getattr(w, "probability", 1.0) or 0.0), 3)}
                 words.append(item)
                 seg_words.append(tok)
         seg_text = " ".join(seg_words) if seg_words else normalize_word(seg.text.strip())
@@ -122,6 +158,19 @@ def main():
         seg_list.append({"start": round(seg.start, 3), "end": round(seg.end, 3), "text": seg_text})
         parts.append(seg_text)
 
+    words = collapse_repeats(words)
+    if words:
+        parts = [" ".join(w["word"] for w in words)]
+        seg_list = [s for s in seg_list if any(s["start"] <= w["start"] <= s["end"] for w in words)]
+
+    # Ishonchlilik: p < LOW_P bo'lgan so'zlar belgilanadi (ularni ekranga chiqarmaslik jcode'ga aytiladi)
+    LOW_P = 0.35
+    for w in words:
+        w["low_conf"] = bool(w.get("p", 1.0) < LOW_P)
+    low_words = [w for w in words if w["low_conf"]]
+    avg_p = round(sum(w.get("p", 1.0) for w in words) / len(words), 3) if words else 0.0
+    last_speech = words[-1]["end"] if words else 0.0
+
     full_text = " ".join(parts).strip()
     latin, total = script_stats(full_text)
     result = {
@@ -129,6 +178,12 @@ def main():
         "script": "latin",
         "model": os.path.basename(str(model_path)),
         "duration": round(getattr(info, "duration", 0.0), 3),
+        "quality": {
+            "avg_word_probability": avg_p,
+            "low_confidence_words": len(low_words),
+            "last_speech_end": last_speech,
+            "note": "low_conf=true so'zlar ishonchsiz: ekranga chiqarmang yoki ehtiyotkorlik bilan ishlating",
+        },
         "text": full_text,
         "words": words,
         "segments": seg_list,
@@ -140,6 +195,7 @@ def main():
         "ok": True, "language": "uz", "model": result["model"],
         "duration": result["duration"], "word_count": len(words),
         "segment_count": len(seg_list), "latin_ratio": round(latin / total, 3) if total else 1.0,
+        "avg_p": avg_p, "low_conf_words": len(low_words),
     }))
 
 

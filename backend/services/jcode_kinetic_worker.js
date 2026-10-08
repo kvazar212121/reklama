@@ -133,6 +133,7 @@ ${inputSection}
 
 ════════ TIL QOIDASI (QAT'IY, ENG MUHIM) ════════
 - Matn O'ZBEK tilida (lotin alifbosida). words.json/script.txt dagi so'zlarni AYNAN shunday ko'rsating.
+- ISHONCHLILIK (ovozli kirish): words.json da har so'zda "p" va "low_conf" bor. low_conf=true so'zlar ISHONCHSIZ: ularni ko'rsatmang va o'zingizdan so'z uydirib to'ldirmang, o'sha joyni o'tkazib yuboring.
 - Ekranga chiqadigan BARCHA matn FAQAT o'zbekcha va FAQAT LOTIN alifbosida bo'lsin (o', g', sh, ch harflari bilan).
 - HECH QACHON arab, fors, kirill (rus), xitoy yoki boshqa yozuvdagi harflar ishlatmang. Hech narsani boshqa tilga TARJIMA QILMANG va o'zingizdan boshqa tilda gap QO'SHMANG.
 - Istisno: texnik/brend nomlari (Instagram, TikTok, AI, CRM, SMM, ROI kabi) asl lotin yozuvida qoladi.
